@@ -8,28 +8,12 @@
   </head>
   <body>
     <main class="page-shell">
-      <section class="device-frame" aria-label="ESP32-S3 240 by 320 dashboard preview">
-        <div class="status-row">
-          <div>
-            <p class="time" id="time">--:--</p>
-            <p class="date" id="date">Loading</p>
-          </div>
-          <div class="signal-group" aria-label="Device status">
-            <span class="signal-dot"></span>
-            <span class="battery-pill"></span>
-          </div>
-        </div>
-
-        <section class="widget-grid" id="dashboard-widgets" aria-label="Dashboard widgets"></section>
+      <section class="device-frame" aria-label="ESP32-S3 320 by 240 landscape dashboard preview">
+        <div id="dashboard" class="dashboard-surface" aria-label="Daily briefing dashboard"></div>
       </section>
     </main>
 
     <script defer src="./src/mock-data.js"></script>
-    <script defer src="./src/widgets/weather.js"></script>
-    <script defer src="./src/widgets/cta.js"></script>
-    <script defer src="./src/widgets/spotify.js"></script>
-    <script defer src="./src/widgets/morning.js"></script>
-    <script defer src="./src/widgets/stocks.js"></script>
     <script defer src="./src/app.js"></script>
   </body>
 </html>

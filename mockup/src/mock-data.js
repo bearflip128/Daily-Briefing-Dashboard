@@ -1,27 +1,30 @@
 const dashboardData = {
+  time: {
+    hourMinute: "5:37",
+    meridiem: "PM",
+    date: "Tue, May 12"
+  },
   weather: {
-    temp: "43",
-    condition: "Clear",
-    highLow: "H 49 / L 36",
-    location: "Chicago"
+    temp: "43&deg;",
+    city: "Chicago",
+    high: "49&deg;",
+    low: "36&deg;"
   },
   cta: {
-    route: "Brown Line",
-    stop: "Merch Mart",
-    status: "On time",
-    nextArrival: "6 min"
+    station: "Fullerton",
+    arrivals: [
+      { line: "Red Line", badge: "R", minutes: "4 min", tone: "red" },
+      { line: "Brown Line", badge: "B", minutes: "6 min", tone: "brown" },
+      { line: "Purple Line", badge: "P", minutes: "9 min", tone: "purple" }
+    ]
   },
-  spotify: {
-    status: "Ready",
-    detail: "Now playing later"
-  },
-  morning: {
-    title: "Morning",
-    summary: "Cold start. Pack gloves. Leave a few minutes early for CTA."
-  },
-  stocks: {
-    symbol: "AAPL",
-    price: "184.20",
-    movement: "+0.8%"
+  markets: [
+    { label: "S&P 500", percent: "+0.71%", direction: "positive" },
+    { label: "VXUS", percent: "+0.42%", direction: "positive" },
+    { label: "BTC", percent: "-1.23%", direction: "negative" }
+  ],
+  quote: {
+    text: "Discipline compounds quietly.",
+    author: "James Clear"
   }
 };

@@ -1,15 +1,30 @@
 # Daily Briefing Dashboard
 
-A lightweight, iOS-inspired smart dashboard for a 240x320 ESP32-S3 display.
+A restrained, black-and-white ESP32-S3 dashboard UI for the Waveshare 2-inch display. The physical panel is 240x320, and this project renders the main dashboard in landscape as a 320x240 screen.
 
-The project starts with a local browser mockup so the interface can be previewed and tuned before the physical screen arrives. The firmware track mirrors the same widget boundaries in C++ so the design can move toward the Waveshare ESP32-S3 display without dragging along a heavy web app architecture.
+The repo has two tracks:
+
+- `mockup`: a local browser preview for fast visual iteration.
+- `firmware`: a PlatformIO/Arduino scaffold with the same layout regions and drawing helper boundaries.
+
+The V1 dashboard is passive display only. Touch, Spotify, news, and API integrations are intentionally left out of the first page.
 
 ## Hardware Target
 
-- Waveshare 2inch ESP32-S3 Display Development Board
-- 240x320 IPS display
-- ESP32-S3 onboard processor
-- WiFi support for future API integrations
+- Waveshare ESP32-S3 2inch Display Development Board
+- 240x320 IPS LCD, used in 320x240 landscape orientation
+- ST7789T3 display driver over 4-wire SPI
+- ESP32-S3 with WiFi support
+
+Source checked: [Waveshare ESP32-S3-LCD-2 product page](https://www.waveshare.com/product/esp32-s3-lcd-2.htm).
+
+## Current UI
+
+- Top row: time/date, weather, CTA Fullerton arrivals
+- Middle strip: S&P 500, VXUS, BTC
+- Bottom section: daily quote
+- Tiny two-dot page indicator for a future second page
+- No gradients, glow, glassmorphism, decorative tech patterns, Spotify, or news
 
 ## Project Structure
 
@@ -18,46 +33,33 @@ Daily-Briefing-Dashboard/
 +-- mockup/
 |   +-- index.html
 |   +-- package.json
-|   +-- src/
-|   |   +-- app.js
-|   |   +-- mock-data.js
-|   |   +-- styles.css
-|   |   +-- widgets/
-|   |       +-- cta.js
-|   |       +-- morning.js
-|   |       +-- spotify.js
-|   |       +-- stocks.js
-|   |       +-- weather.js
 |   +-- config.example.json
+|   +-- src/
+|       +-- app.js
+|       +-- mock-data.js
+|       +-- styles.css
 +-- firmware/
 |   +-- platformio.ini
 |   +-- src/
 |   |   +-- main.cpp
 |   +-- include/
-|   |   +-- config/
-|   |   |   +-- AppConfig.h
-|   |   |   +-- config.example.h
-|   |   +-- display/
-|   |   |   +-- DisplayDriver.h
-|   |   +-- services/
-|   |   |   +-- MockDataService.h
-|   |   +-- ui/
-|   |   |   +-- DashboardScreen.h
-|   |   +-- widgets/
-|   |       +-- CtaWidget.h
-|   |       +-- MorningWidget.h
-|   |       +-- SpotifyWidget.h
-|   |       +-- StockWidget.h
-|   |       +-- WeatherWidget.h
-|   +-- data/
+|       +-- config/
+|       |   +-- AppConfig.h
+|       |   +-- config.example.h
+|       +-- display/
+|       |   +-- DisplayDriver.h
+|       +-- services/
+|       |   +-- MockDataService.h
+|       +-- ui/
+|           +-- DashboardScreen.h
 +-- .gitignore
 ```
 
 ## Run the Local Mockup
 
-The mockup uses plain HTML, CSS, and JavaScript. The simplest path is to open `mockup/index.html` in a browser.
+Open `mockup/index.html` directly in a browser.
 
-Vite is included as an optional convenience when Node.js is installed:
+Vite is optional if Node.js is installed:
 
 ```bash
 cd mockup
@@ -65,49 +67,61 @@ npm install
 npm run dev
 ```
 
-Then open the local URL printed by Vite. The dashboard frame is locked to the ESP32 target resolution of 240x320 so spacing and readability can be judged early.
+The mockup is fixed at 320x240 pixels so browser layout decisions map cleanly to embedded display coordinates.
 
-## Firmware Notes
+## Firmware Setup Notes
 
-The firmware scaffold is organized as a PlatformIO project.
+Install PlatformIO, then build:
 
 ```bash
 cd firmware
 pio run
 ```
 
-The current firmware uses mock data and serial output only. Display rendering is intentionally isolated behind `DisplayDriver`, so the final Waveshare display library can be wired in without rewriting widget logic.
+Flash when the board is connected:
+
+```bash
+pio run --target upload
+pio device monitor
+```
+
+The current firmware scaffold compiles around a placeholder `DisplayDriver` that logs drawing calls over serial. This keeps the UI source readable while isolating board-specific display setup.
+
+To render on the real screen, replace the placeholder methods in `firmware/include/display/DisplayDriver.h` with calls to a graphics library such as TFT_eSPI, LovyanGFX, or Waveshare's Arduino examples. The board-specific section to adjust is clearly marked in `DisplayDriver::begin()`.
+
+Likely display details from Waveshare:
+
+- Driver IC: ST7789T3
+- Interface: 4-wire SPI
+- Native resolution: 240x320
+- Desired UI rotation: landscape 320x240
 
 ## Configuration
 
 No real API credentials are required yet.
 
-- Copy `mockup/config.example.json` to `mockup/config.local.json` when the web mockup needs local keys.
-- Copy `firmware/include/config/config.example.h` to `firmware/include/config/config.local.h` when firmware credentials are needed.
+- Copy `mockup/config.example.json` to `mockup/config.local.json` for future browser API testing.
+- Copy `firmware/include/config/config.example.h` to `firmware/include/config/config.local.h` for future firmware credentials.
 - Keep local config files out of Git.
 
-Future integrations are planned for:
+## Rendering Helpers
 
-- Spotify now-playing API
-- Weather API
-- CTA train and bus arrivals
-- WSJ or news headlines
-- Stock ticker rotation
-- Morning briefing summary
+Both tracks are organized around these helper ideas:
+
+- `drawRoundedFrame`
+- `drawDivider`
+- `drawTimeSection`
+- `drawWeatherSection`
+- `drawCTASection`
+- `drawMarketsStrip`
+- `drawQuoteSection`
+- `drawPageIndicator`
 
 ## Roadmap
 
-1. Tune the browser mockup for legibility on the 240x320 display size.
-2. Add real display driver support for the Waveshare ESP32-S3 board.
-3. Add WiFi setup and local configuration loading.
-4. Replace mock weather, CTA, Spotify, stock, and summary data with service modules.
-5. Add simple caching and refresh intervals suitable for embedded hardware.
-6. Package the dashboard as a flashable firmware build.
-
-## Design Principles
-
-- Dark mode by default.
-- Persistent time and date.
-- Icon-forward cards instead of dense text.
-- Compact widget layout inspired by iOS widgets and Control Center.
-- Small, modular code that can be understood, modified, and ported.
+1. Tune spacing on the actual 2-inch panel.
+2. Wire `DisplayDriver` to the Waveshare ST7789T3 display.
+3. Add WiFi setup and local config loading.
+4. Add cached weather, CTA, and market service modules.
+5. Add a second touch/swipe page for Spotify later.
+6. Add power-conscious refresh intervals.
