@@ -1,4 +1,4 @@
-export function renderSpotifyWidget(spotify) {
+function renderSpotifyWidget(spotify) {
   return `
     <article class="card spotify-card">
       <div class="spotify-logo" aria-label="Spotify placeholder">

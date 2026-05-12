@@ -1,4 +1,4 @@
-export function renderMorningWidget(morning) {
+function renderMorningWidget(morning) {
   return `
     <article class="card morning-card">
       <div class="card-topline">

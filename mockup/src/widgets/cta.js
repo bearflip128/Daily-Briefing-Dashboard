@@ -1,4 +1,4 @@
-export function renderCtaWidget(cta) {
+function renderCtaWidget(cta) {
   return `
     <article class="card cta-card">
       <div class="card-topline">

@@ -1,4 +1,4 @@
-export function renderWeatherWidget(weather) {
+function renderWeatherWidget(weather) {
   return `
     <article class="card weather-card">
       <div class="card-topline">

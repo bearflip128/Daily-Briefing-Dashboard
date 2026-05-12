@@ -1,4 +1,4 @@
-export function renderStockWidget(stock) {
+function renderStockWidget(stock) {
   return `
     <article class="card stock-card">
       <div class="card-topline">

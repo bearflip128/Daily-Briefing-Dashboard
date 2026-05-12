@@ -1,4 +1,4 @@
-export const dashboardData = {
+const dashboardData = {
   weather: {
     temp: "43",
     condition: "Clear",
