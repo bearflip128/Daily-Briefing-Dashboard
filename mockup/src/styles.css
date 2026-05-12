@@ -1,0 +1,281 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #101114;
+  color: #f7f7fb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(82, 144, 255, 0.18), transparent 28%),
+    linear-gradient(145deg, #17191f, #0c0d10 70%);
+}
+
+.page-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.device-frame {
+  width: 240px;
+  height: 320px;
+  overflow: hidden;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(45, 49, 58, 0.94), rgba(17, 18, 23, 0.98)),
+    #121319;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
+}
+
+.status-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  height: 42px;
+}
+
+.time,
+.date,
+p {
+  margin: 0;
+}
+
+.time {
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 720;
+}
+
+.date {
+  margin-top: 2px;
+  color: rgba(247, 247, 251, 0.64);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.signal-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding-top: 4px;
+}
+
+.signal-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7cf5b4;
+  box-shadow: 0 0 12px rgba(124, 245, 180, 0.7);
+}
+
+.battery-pill {
+  width: 22px;
+  height: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 5px;
+  position: relative;
+}
+
+.battery-pill::before {
+  content: "";
+  position: absolute;
+  inset: 2px 6px 2px 2px;
+  border-radius: 3px;
+  background: #f2d06b;
+}
+
+.widget-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: minmax(58px, auto);
+  gap: 7px;
+}
+
+.card {
+  min-width: 0;
+  min-height: 58px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.card-topline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(247, 247, 251, 0.72);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.icon-bubble {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.weather-card {
+  background: linear-gradient(145deg, rgba(52, 126, 255, 0.44), rgba(64, 199, 165, 0.18));
+}
+
+.weather-main {
+  display: flex;
+  align-items: end;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.weather-temp {
+  font-size: 28px;
+  line-height: 0.9;
+  font-weight: 760;
+}
+
+.weather-condition {
+  padding-bottom: 2px;
+  color: rgba(247, 247, 251, 0.74);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.card-detail {
+  margin-top: 4px;
+  color: rgba(247, 247, 251, 0.62);
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.cta-card {
+  background: linear-gradient(145deg, rgba(228, 56, 76, 0.42), rgba(245, 144, 74, 0.18));
+}
+
+.route-name {
+  margin-top: 7px;
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 780;
+}
+
+.arrival-pill {
+  display: inline-flex;
+  margin-top: 6px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 760;
+}
+
+.spotify-card {
+  grid-column: span 2;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(145deg, rgba(39, 211, 102, 0.26), rgba(30, 32, 38, 0.76));
+}
+
+.spotify-logo {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #1ed760;
+  position: relative;
+}
+
+.spotify-logo span {
+  position: absolute;
+  left: 8px;
+  height: 2px;
+  border-radius: 2px;
+  background: #102015;
+}
+
+.spotify-logo span:nth-child(1) {
+  top: 11px;
+  width: 19px;
+}
+
+.spotify-logo span:nth-child(2) {
+  top: 16px;
+  width: 16px;
+}
+
+.spotify-logo span:nth-child(3) {
+  top: 21px;
+  width: 13px;
+}
+
+.card-title {
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 780;
+}
+
+.morning-card {
+  grid-column: span 2;
+  min-height: 66px;
+  background: linear-gradient(145deg, rgba(126, 96, 255, 0.32), rgba(38, 42, 51, 0.76));
+}
+
+.summary-text {
+  margin-top: 6px;
+  color: rgba(247, 247, 251, 0.84);
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 600;
+}
+
+.stock-card {
+  grid-column: span 2;
+  min-height: 38px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.stock-card .card-topline {
+  grid-row: span 2;
+}
+
+.stock-price,
+.stock-move {
+  text-align: right;
+}
+
+.stock-price {
+  font-size: 14px;
+  font-weight: 780;
+}
+
+.stock-move {
+  color: #7cf5b4;
+  font-size: 11px;
+  font-weight: 760;
+}

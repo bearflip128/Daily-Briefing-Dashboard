@@ -1,0 +1,19 @@
+{
+  "weather": {
+    "apiBaseUrl": "https://api.example.com/weather",
+    "apiKey": "YOUR_WEATHER_API_KEY",
+    "location": "Chicago,IL"
+  },
+  "cta": {
+    "apiBaseUrl": "https://api.example.com/cta",
+    "apiKey": "YOUR_CTA_API_KEY",
+    "defaultStopId": "YOUR_STOP_ID"
+  },
+  "spotify": {
+    "clientId": "YOUR_SPOTIFY_CLIENT_ID",
+    "redirectUri": "http://127.0.0.1:5173/callback"
+  },
+  "stocks": {
+    "symbols": ["AAPL", "SPY"]
+  }
+}
