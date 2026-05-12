@@ -70,20 +70,18 @@ class DashboardScreen {
   }
 
   void drawWeatherSection(const WeatherSnapshot& weather) {
-    display_.weatherCloud(140, 24, DashboardColor::white);
-    display_.text(140, 56, weather.temperature + " deg", 3, DashboardColor::white);
-    display_.text(134, 88, weather.city, 1, DashboardColor::white);
-    display_.text(126, 106, "H " + weather.high + " deg  L " + weather.low + " deg", 1, DashboardColor::muted);
+    display_.text(134, 24, weather.temperature + " deg", 4, DashboardColor::white);
+    display_.text(132, 76, weather.city, 2, DashboardColor::white);
+    display_.text(126, 104, "H " + weather.high + " deg  L " + weather.low + " deg", 1, DashboardColor::muted);
   }
 
   void drawCTASection(const CtaSnapshot& cta) {
     display_.text(214, 24, "CTA - " + cta.station, 1, DashboardColor::muted);
     for (uint8_t i = 0; i < 3; i++) {
-      const int16_t y = 50 + (i * 22);
-      display_.circle(220, y + 4, 7, cta.arrivals[i].accentColor);
-      display_.text(217, y, cta.arrivals[i].badge, 1, DashboardColor::white);
-      display_.text(234, y, cta.arrivals[i].line, 1, DashboardColor::white);
-      display_.text(278, y, cta.arrivals[i].nextArrival, 1, DashboardColor::muted);
+      const int16_t y = 50 + (i * 24);
+      display_.circle(224, y + 7, 11, cta.arrivals[i].accentColor);
+      display_.text(221, y + 3, cta.arrivals[i].badge, 1, DashboardColor::white);
+      display_.text(244, y + 2, cta.arrivals[i].nextArrival, 2, DashboardColor::white);
     }
   }
 

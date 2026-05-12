@@ -94,14 +94,14 @@ p {
 
 .time-meridiem {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 650;
 }
 
 .date-line {
   margin-top: 10px;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 520;
 }
 
@@ -110,36 +110,27 @@ p {
   text-align: center;
 }
 
-.weather-icon {
-  width: 42px;
-  height: 28px;
-  fill: none;
-  stroke: var(--ink);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
 .weather-temp {
-  margin-top: 6px;
+  margin-top: 2px;
   color: var(--ink);
-  font-size: 32px;
+  font-size: 39px;
   font-weight: 640;
   line-height: 1;
 }
 
 .weather-city {
-  margin-top: 6px;
+  margin-top: 12px;
   color: var(--ink);
-  font-size: 14px;
-  font-weight: 560;
+  font-size: 16px;
+  font-weight: 580;
 }
 
 .weather-range {
-  margin-top: 4px;
+  margin-top: 8px;
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 520;
+  font-size: 12px;
+  font-weight: 560;
+  white-space: nowrap;
 }
 
 .cta-section {
@@ -148,37 +139,37 @@ p {
 
 .section-label {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
   white-space: nowrap;
 }
 
 .cta-list {
   display: grid;
-  gap: 8px;
-  margin: 11px 0 0;
+  gap: 9px;
+  margin: 12px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .cta-list li {
   display: grid;
-  grid-template-columns: 16px 1fr auto;
+  grid-template-columns: 24px auto;
   align-items: center;
-  gap: 4px;
+  gap: 10px;
   color: var(--ink);
-  font-size: 10px;
+  font-size: 16px;
   line-height: 1;
 }
 
 .line-badge {
   display: grid;
   place-items: center;
-  width: 14px;
-  height: 14px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   color: white;
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 750;
 }
 
@@ -194,15 +185,11 @@ p {
   background: var(--purple-line);
 }
 
-.line-name {
+.arrival-time {
   color: var(--ink);
   white-space: nowrap;
-}
-
-.arrival-time {
-  color: var(--muted);
-  white-space: nowrap;
-  font-size: 10px;
+  font-size: 16px;
+  font-weight: 650;
 }
 
 .markets-strip {
@@ -222,13 +209,13 @@ p {
 
 .market-label {
   color: var(--ink);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 620;
   white-space: nowrap;
 }
 
 .market-percent {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 650;
   white-space: nowrap;
 }
@@ -256,7 +243,7 @@ p {
 .quote-author {
   margin-top: 7px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 520;
 }
 

@@ -40,9 +40,6 @@ function drawWeatherSection(weather) {
   dashboard.insertAdjacentHTML(
     "beforeend",
     `<section class="weather-section" style="left:${x}px; top:${UI.regions.top.y}px">
-      <svg class="weather-icon" viewBox="0 0 44 28" aria-hidden="true">
-        <path d="M14.5 22.5H31a8 8 0 0 0 .7-16 11 11 0 0 0-20.4 3.3A6.5 6.5 0 0 0 14.5 22.5Z" />
-      </svg>
       <div class="weather-temp">${weather.temp}</div>
       <p class="weather-city">${weather.city}</p>
       <p class="weather-range">H ${weather.high}  L ${weather.low}</p>
@@ -56,7 +53,6 @@ function drawCTASection(cta) {
     .map(
       (arrival) => `<li>
         <span class="line-badge ${arrival.tone}">${arrival.badge}</span>
-        <span class="line-name">${arrival.line}</span>
         <span class="arrival-time">${arrival.minutes}</span>
       </li>`
     )

@@ -10,7 +10,6 @@ struct WeatherSnapshot {
 };
 
 struct CtaArrival {
-  String line;
   String badge;
   String nextArrival;
   uint16_t accentColor;
@@ -65,9 +64,9 @@ class MockDataService {
         "Tue, May 12",
         {"43", "Chicago", "49", "36"},
         {"Fullerton",
-         {{"Red Line", "R", "4 min", DashboardColor::ctaRed},
-          {"Brown Line", "B", "6 min", DashboardColor::ctaBrown},
-          {"Purple Line", "P", "9 min", DashboardColor::ctaPurple}}},
+         {{"R", "4 min", DashboardColor::ctaRed},
+          {"B", "6 min", DashboardColor::ctaBrown},
+          {"P", "9 min", DashboardColor::ctaPurple}}},
         {{"S&P 500", "+0.71%", true},
          {"VXUS", "+0.42%", true},
          {"BTC", "-1.23%", false}},
