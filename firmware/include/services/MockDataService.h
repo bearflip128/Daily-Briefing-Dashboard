@@ -78,7 +78,7 @@ class MockDataService {
     if (WiFi.status() == WL_CONNECTED) {
       Serial.print("WiFi connected: ");
       Serial.println(WiFi.localIP());
-      configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+      configTzTime("CST6CDT,M3.2.0,M11.1.0", "pool.ntp.org", "time.nist.gov");
     } else {
       Serial.println("WiFi unavailable; using fallback dashboard data.");
     }
@@ -262,11 +262,13 @@ class MockDataService {
     const String routeToken = "\"rt\":\"" + route + "\"";
     const int routeIndex = body.indexOf(routeToken);
     if (routeIndex < 0) {
+      arrival.nextArrival = "--";
       return;
     }
 
     const int arrivalKey = body.indexOf("\"arrT\":\"", routeIndex);
     if (arrivalKey < 0) {
+      arrival.nextArrival = "--";
       return;
     }
 

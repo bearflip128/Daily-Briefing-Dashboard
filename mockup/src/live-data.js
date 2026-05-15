@@ -8,7 +8,8 @@ const liveConfig = {
   cta: {
     // CTA Train Tracker requires a key. Add one here or in config.local.json.
     apiKey: "",
-    stationMapId: "41220"
+    stationMapId: "41220",
+    proxyUrl: "/api/cta"
   },
   markets: [
     { label: "S&P 500", stooq: "^spx" },
@@ -96,18 +97,26 @@ async function loadQuote(data) {
 }
 
 async function loadCta(data) {
-  if (!liveConfig.cta.apiKey) {
+  const canUseLocalProxy = window.location.protocol.startsWith("http");
+  if (!liveConfig.cta.apiKey && !canUseLocalProxy) {
     return data.cta;
   }
 
-  // CTA returns XML and requires a key. Browsers may also need a same-origin
-  // proxy for production; this direct call is mainly for local iteration.
-  const url = new URL("https://lapi.transitchicago.com/api/1.0/ttarrivals.aspx");
-  url.search = new URLSearchParams({
-    key: liveConfig.cta.apiKey,
-    mapid: liveConfig.cta.stationMapId,
-    outputType: "JSON"
-  });
+  const url = canUseLocalProxy
+    ? new URL(liveConfig.cta.proxyUrl, window.location.origin)
+    : new URL("https://lapi.transitchicago.com/api/1.0/ttarrivals.aspx");
+
+  if (canUseLocalProxy) {
+    url.search = new URLSearchParams({ mapid: liveConfig.cta.stationMapId });
+  } else {
+    // Direct mode is a fallback for opening index.html from disk. The local
+    // dev server is preferred because CTA may block file:// browser requests.
+    url.search = new URLSearchParams({
+      key: liveConfig.cta.apiKey,
+      mapid: liveConfig.cta.stationMapId,
+      outputType: "JSON"
+    });
+  }
 
   const payload = await fetchJson(url);
   const eta = payload.ctatt?.eta || [];
@@ -119,7 +128,9 @@ async function loadCta(data) {
 
   const arrivals = routeOrder.map((route, index) => {
     const match = eta.find((arrival) => arrival.rt === route.rt);
-    if (!match) return data.cta.arrivals[index];
+    if (!match) {
+      return { ...data.cta.arrivals[index], minutes: "--" };
+    }
 
     const now = new Date();
     const arrival = new Date(match.arrT);

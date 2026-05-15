@@ -57,14 +57,23 @@ Daily-Briefing-Dashboard/
 
 ## Run the Local Mockup
 
-Open `mockup/index.html` directly in a browser.
+For live CTA arrivals, run the tiny local server. It serves the static mockup and proxies CTA Train Tracker so the API key stays local:
 
-Vite is optional if Node.js is installed:
+```bash
+cd mockup
+npm run dev
+```
+
+Then open `http://127.0.0.1:5173`.
+
+You can still open `mockup/index.html` directly in a browser for static layout work, but some live APIs may fall back to mock data from `file://`.
+
+Vite is optional if you want the standard Vite workflow:
 
 ```bash
 cd mockup
 npm install
-npm run dev
+npm run vite
 ```
 
 The mockup is fixed at 320x240 pixels so browser layout decisions map cleanly to embedded display coordinates.
