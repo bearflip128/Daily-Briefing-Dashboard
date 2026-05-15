@@ -39,7 +39,7 @@ function drawWeatherSection(weather) {
     "beforeend",
     `<section class="weather-section" style="left:124px; top:${UI.regions.top.y}px">
       <div class="weather-temp">${weather.temp}</div>
-      <p class="weather-range">H ${weather.high}  L ${weather.low}</p>
+      <p class="weather-range">H ${weather.high}</p>
     </section>`
   );
 }
