@@ -72,9 +72,10 @@ class DashboardScreen {
   }
 
   void drawWeatherSection(const WeatherSnapshot& weather) {
-    display_.textSans(136, 56, weather.temperature, 2, DashboardColor::white);
-    display_.degreeMark(188, 34, DashboardColor::white);
-    display_.textSans(124, 94, "H " + weather.high, 1, DashboardColor::muted);
+    display_.circle(130, 43, 9, DashboardColor::divider);
+    display_.text(126, 39, "H", 1, DashboardColor::muted);
+    display_.textSans(146, 56, weather.high, 2, DashboardColor::white);
+    display_.degreeMark(198, 34, DashboardColor::white);
   }
 
   void drawCTASection(const CtaSnapshot& cta) {
