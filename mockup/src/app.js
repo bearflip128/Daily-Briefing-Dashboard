@@ -8,8 +8,8 @@ const UI = {
     quote: { x: 20, y: 176, w: 280, h: 46 }
   },
   columns: {
-    timeW: 98,
-    weatherW: 88
+    timeW: 92,
+    weatherW: 90
   }
 };
 
@@ -36,7 +36,7 @@ function drawTimeSection(time) {
 }
 
 function drawWeatherSection(weather) {
-  const x = UI.regions.top.x + UI.columns.timeW + 12;
+  const x = UI.regions.top.x + UI.columns.timeW + 10;
   dashboard.insertAdjacentHTML(
     "beforeend",
     `<section class="weather-section" style="left:${x}px; top:${UI.regions.top.y}px">
@@ -48,7 +48,7 @@ function drawWeatherSection(weather) {
 }
 
 function drawCTASection(cta) {
-  const x = UI.regions.top.x + UI.columns.timeW + UI.columns.weatherW + 7;
+  const x = UI.regions.top.x + UI.columns.timeW + UI.columns.weatherW + 10;
   const rows = cta.arrivals
     .map(
       (arrival) => `<li>
@@ -113,8 +113,8 @@ function renderDashboard(data) {
   drawRoundedFrame();
   drawDivider({ x: 20, y: 124, w: 280, h: 1 });
   drawDivider({ x: 20, y: 170, w: 280, h: 1 });
-  drawDivider({ x: 118, y: 20, w: 1, h: 102 });
-  drawDivider({ x: 206, y: 20, w: 1, h: 102 });
+  drawDivider({ x: 112, y: 20, w: 1, h: 102 });
+  drawDivider({ x: 202, y: 20, w: 1, h: 102 });
   drawDivider({ x: 113, y: 132, w: 1, h: 30, className: "markets-divider" });
   drawDivider({ x: 206, y: 132, w: 1, h: 30, className: "markets-divider" });
 

@@ -18,8 +18,8 @@ constexpr int16_t dividerTopY = 124;
 constexpr int16_t marketsY = 126;
 constexpr int16_t dividerBottomY = 170;
 constexpr int16_t quoteY = 176;
-constexpr int16_t timeDividerX = 118;
-constexpr int16_t weatherDividerX = 206;
+constexpr int16_t timeDividerX = 112;
+constexpr int16_t weatherDividerX = 202;
 constexpr int16_t marketDividerA = 113;
 constexpr int16_t marketDividerB = 206;
 }
@@ -65,23 +65,23 @@ class DashboardScreen {
 
   void drawTimeSection(const DashboardSnapshot& data) {
     display_.text(20, 24, data.time, 4, DashboardColor::white);
-    display_.text(88, 35, data.meridiem, 1, DashboardColor::muted);
+    display_.text(84, 42, data.meridiem, 1, DashboardColor::muted);
     display_.text(20, 76, data.date, 2, DashboardColor::muted);
   }
 
   void drawWeatherSection(const WeatherSnapshot& weather) {
-    display_.text(134, 24, weather.temperature + " deg", 4, DashboardColor::white);
-    display_.text(132, 76, weather.city, 2, DashboardColor::white);
-    display_.text(126, 104, "H " + weather.high + " deg  L " + weather.low + " deg", 1, DashboardColor::muted);
+    display_.text(128, 24, weather.temperature + " deg", 4, DashboardColor::white);
+    display_.text(128, 76, weather.city, 2, DashboardColor::white);
+    display_.text(122, 104, "H " + weather.high + " deg  L " + weather.low + " deg", 1, DashboardColor::muted);
   }
 
   void drawCTASection(const CtaSnapshot& cta) {
-    display_.text(214, 24, "CTA - " + cta.station, 1, DashboardColor::muted);
+    display_.text(212, 24, "CTA - " + cta.station, 1, DashboardColor::muted);
     for (uint8_t i = 0; i < 3; i++) {
       const int16_t y = 50 + (i * 24);
-      display_.circle(224, y + 7, 11, cta.arrivals[i].accentColor);
-      display_.text(221, y + 3, cta.arrivals[i].badge, 1, DashboardColor::white);
-      display_.text(244, y + 2, cta.arrivals[i].nextArrival, 2, DashboardColor::white);
+      display_.circle(222, y + 7, 11, cta.arrivals[i].accentColor);
+      display_.text(219, y + 3, cta.arrivals[i].badge, 1, DashboardColor::white);
+      display_.text(242, y + 2, cta.arrivals[i].nextArrival, 2, DashboardColor::white);
     }
   }
 
