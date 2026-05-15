@@ -53,10 +53,15 @@ async function loadWeather(data) {
 
 function parseStooqCsv(csv) {
   const [, row] = csv.trim().split(/\r?\n/);
-  const [, , , , close, , , changePercent] = row.split(",");
-  const pct = changePercent === "N/D" ? "0.00%" : changePercent;
+  const [, , , , , , closeValue, , previousClose] = row.split(",");
+  const close = Number(closeValue);
+  const previous = Number(previousClose);
+  const change = Number.isFinite(close) && Number.isFinite(previous) && previous !== 0
+    ? ((close - previous) / previous) * 100
+    : 0;
+  const pct = `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`;
   return {
-    close,
+    close: closeValue,
     percent: pct.startsWith("-") || pct.startsWith("+") ? pct : `+${pct}`
   };
 }

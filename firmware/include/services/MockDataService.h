@@ -209,23 +209,34 @@ class MockDataService {
       const int headerEnd = body.indexOf('\n');
       if (headerEnd < 0) continue;
       String row = body.substring(headerEnd + 1);
-      int comma = -1;
-      int lastComma = -1;
-      for (uint8_t field = 0; field < 8; field++) {
-        lastComma = comma;
-        comma = row.indexOf(',', comma + 1);
-        if (comma < 0) break;
-      }
-      if (lastComma < 0 || comma < 0) continue;
-      String percent = row.substring(lastComma + 1, comma);
-      percent.trim();
-      if (percent == "N/D" || percent.length() == 0) continue;
+
+      const float close = getCsvField(row, 6).toFloat();
+      const float previous = getCsvField(row, 8).toFloat();
+      if (close <= 0 || previous <= 0) continue;
+
+      const float change = ((close - previous) / previous) * 100.0f;
+      String percent = String(change, 2) + "%";
       if (!percent.startsWith("-") && !percent.startsWith("+")) {
         percent = "+" + percent;
       }
       snapshot.markets[i].percent = percent;
       snapshot.markets[i].positive = !percent.startsWith("-");
     }
+  }
+
+  static String getCsvField(const String& row, uint8_t targetField) {
+    int start = 0;
+    for (uint8_t field = 0; field < targetField; field++) {
+      start = row.indexOf(',', start);
+      if (start < 0) return "";
+      start++;
+    }
+
+    int end = row.indexOf(',', start);
+    if (end < 0) end = row.length();
+    String value = row.substring(start, end);
+    value.trim();
+    return value;
   }
 
   static void applyLiveQuote(DashboardSnapshot& snapshot) {
