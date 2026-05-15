@@ -18,7 +18,6 @@ constexpr int16_t dividerTopY = 124;
 constexpr int16_t marketsY = 126;
 constexpr int16_t dividerBottomY = 170;
 constexpr int16_t quoteY = 176;
-constexpr int16_t timeDividerX = 112;
 constexpr int16_t weatherDividerX = 202;
 constexpr int16_t marketDividerA = 113;
 constexpr int16_t marketDividerB = 206;
@@ -34,6 +33,10 @@ class DashboardScreen {
   }
 
   void update() {
+    if (rendered_) {
+      return;
+    }
+
     const DashboardSnapshot data = dataService_.dashboard();
 
     display_.clear(DashboardColor::black);
@@ -44,6 +47,7 @@ class DashboardScreen {
     drawMarketsStrip(data.markets);
     drawQuoteSection(data.quote);
     drawPageIndicator();
+    rendered_ = true;
   }
 
  private:
@@ -56,7 +60,6 @@ class DashboardScreen {
     // Major dividers map to the requested y ~= 125 and y ~= 170 layout bands.
     display_.line(20, DashboardLayout::dividerTopY, 300, DashboardLayout::dividerTopY, DashboardColor::divider);
     display_.line(20, DashboardLayout::dividerBottomY, 300, DashboardLayout::dividerBottomY, DashboardColor::divider);
-    display_.line(DashboardLayout::timeDividerX, 20, DashboardLayout::timeDividerX, 122, DashboardColor::divider);
     display_.line(DashboardLayout::weatherDividerX, 20, DashboardLayout::weatherDividerX, 122, DashboardColor::divider);
     display_.line(DashboardLayout::marketDividerA, 132, DashboardLayout::marketDividerA, 162, DashboardColor::divider);
     display_.line(DashboardLayout::marketDividerB, 132, DashboardLayout::marketDividerB, 162, DashboardColor::divider);
@@ -69,9 +72,9 @@ class DashboardScreen {
   }
 
   void drawWeatherSection(const WeatherSnapshot& weather) {
-    display_.text(130, 28, weather.temperature, 4, DashboardColor::white);
-    display_.degreeMark(182, 30, DashboardColor::white);
-    display_.text(128, 76, weather.city, 2, DashboardColor::white);
+    display_.text(124, 28, weather.temperature, 4, DashboardColor::white);
+    display_.degreeMark(176, 30, DashboardColor::white);
+    display_.text(124, 76, weather.city, 2, DashboardColor::white);
     display_.text(124, 106, "H " + weather.high + "  L " + weather.low, 1, DashboardColor::muted);
   }
 
@@ -95,8 +98,10 @@ class DashboardScreen {
   }
 
   void drawQuoteSection(const QuoteSnapshot& quote) {
-    display_.text(24, 184, "\"" + quote.text + "\"", 2, DashboardColor::white);
-    display_.text(24, 210, "- " + quote.author, 1, DashboardColor::muted);
+    // Future quote API: if quotes exceed the display width, animate this line
+    // horizontally as a ticker instead of clipping or shrinking it too far.
+    display_.text(24, 186, "\"" + quote.text + "\"", 1, DashboardColor::white);
+    display_.text(24, 206, "- " + quote.author, 1, DashboardColor::muted);
   }
 
   void drawPageIndicator() {
@@ -106,4 +111,5 @@ class DashboardScreen {
 
   DisplayDriver& display_;
   MockDataService& dataService_;
+  bool rendered_ = false;
 };

@@ -75,13 +75,13 @@ p {
 .time-line {
   position: relative;
   display: block;
-  width: 86px;
-  height: 41px;
+  width: 100px;
+  height: 42px;
 }
 
 .time-value {
   color: var(--ink);
-  font-size: 39px;
+  font-size: 40px;
   font-weight: 650;
   letter-spacing: 0;
   line-height: 0.96;
@@ -89,8 +89,8 @@ p {
 
 .time-meridiem {
   position: absolute;
-  left: 72px;
-  top: 24px;
+  left: 74px;
+  top: 25px;
   color: var(--muted);
   font-size: 13px;
   font-weight: 650;
@@ -104,12 +104,12 @@ p {
 }
 
 .weather-section {
-  width: 78px;
-  text-align: center;
+  width: 70px;
+  text-align: left;
 }
 
 .weather-temp {
-  margin-top: 2px;
+  margin-top: 0;
   color: var(--ink);
   font-size: 39px;
   font-weight: 640;
@@ -126,7 +126,7 @@ p {
 .weather-range {
   margin-top: 8px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 560;
   white-space: nowrap;
 }
@@ -233,9 +233,10 @@ p {
 
 .quote-text {
   color: var(--ink);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 520;
-  line-height: 1.18;
+  line-height: 1.16;
+  white-space: nowrap;
 }
 
 .quote-author {

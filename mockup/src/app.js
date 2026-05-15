@@ -8,8 +8,7 @@ const UI = {
     quote: { x: 20, y: 176, w: 280, h: 46 }
   },
   columns: {
-    timeW: 92,
-    weatherW: 90
+    ctaX: 212
   }
 };
 
@@ -36,10 +35,9 @@ function drawTimeSection(time) {
 }
 
 function drawWeatherSection(weather) {
-  const x = UI.regions.top.x + UI.columns.timeW + 10;
   dashboard.insertAdjacentHTML(
     "beforeend",
-    `<section class="weather-section" style="left:${x}px; top:${UI.regions.top.y}px">
+    `<section class="weather-section" style="left:124px; top:${UI.regions.top.y}px">
       <div class="weather-temp">${weather.temp}</div>
       <p class="weather-city">${weather.city}</p>
       <p class="weather-range">H ${weather.high}  L ${weather.low}</p>
@@ -48,7 +46,6 @@ function drawWeatherSection(weather) {
 }
 
 function drawCTASection(cta) {
-  const x = UI.regions.top.x + UI.columns.timeW + UI.columns.weatherW + 10;
   const rows = cta.arrivals
     .map(
       (arrival) => `<li>
@@ -60,7 +57,7 @@ function drawCTASection(cta) {
 
   dashboard.insertAdjacentHTML(
     "beforeend",
-    `<section class="cta-section" style="left:${x}px; top:${UI.regions.top.y}px">
+    `<section class="cta-section" style="left:${UI.columns.ctaX}px; top:${UI.regions.top.y}px">
       <p class="section-label">CTA &mdash; ${cta.station}</p>
       <ul class="cta-list">${rows}</ul>
     </section>`
@@ -113,7 +110,6 @@ function renderDashboard(data) {
   drawRoundedFrame();
   drawDivider({ x: 20, y: 124, w: 280, h: 1 });
   drawDivider({ x: 20, y: 170, w: 280, h: 1 });
-  drawDivider({ x: 112, y: 20, w: 1, h: 102 });
   drawDivider({ x: 202, y: 20, w: 1, h: 102 });
   drawDivider({ x: 113, y: 132, w: 1, h: 30, className: "markets-divider" });
   drawDivider({ x: 206, y: 132, w: 1, h: 30, className: "markets-divider" });
