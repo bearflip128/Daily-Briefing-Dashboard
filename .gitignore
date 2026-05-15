@@ -8,6 +8,7 @@ node_modules/
 
 # Local config and secrets
 mockup/config.local.json
+mockup/src/config.local.js
 firmware/include/config/config.local.h
 .env
 .env.*

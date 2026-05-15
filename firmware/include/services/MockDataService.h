@@ -250,16 +250,54 @@ class MockDataService {
       return;
     }
 
-    // Keep CTA parsing intentionally conservative. The official endpoint
-    // requires a key; fallback arrivals remain if the response shape changes.
-    const int red = body.indexOf("\"rt\":\"Red\"");
-    const int brn = body.indexOf("\"rt\":\"Brn\"");
-    const int purple = body.indexOf("\"rt\":\"P\"");
-    if (red >= 0) snapshot.cta.arrivals[0].nextArrival = "live";
-    if (brn >= 0) snapshot.cta.arrivals[1].nextArrival = "live";
-    if (purple >= 0) snapshot.cta.arrivals[2].nextArrival = "live";
+    applyRouteArrival(body, "Red", snapshot.cta.arrivals[0]);
+    applyRouteArrival(body, "Brn", snapshot.cta.arrivals[1]);
+    applyRouteArrival(body, "P", snapshot.cta.arrivals[2]);
 #else
     (void)snapshot;
 #endif
+  }
+
+  static void applyRouteArrival(const String& body, const String& route, CtaArrival& arrival) {
+    const String routeToken = "\"rt\":\"" + route + "\"";
+    const int routeIndex = body.indexOf(routeToken);
+    if (routeIndex < 0) {
+      return;
+    }
+
+    const int arrivalKey = body.indexOf("\"arrT\":\"", routeIndex);
+    if (arrivalKey < 0) {
+      return;
+    }
+
+    const int start = arrivalKey + 8;
+    const int end = body.indexOf('"', start);
+    if (end < 0) {
+      return;
+    }
+
+    const int minutes = minutesUntil(body.substring(start, end));
+    if (minutes >= 0) {
+      arrival.nextArrival = String(minutes) + " min";
+    }
+  }
+
+  static int minutesUntil(const String& isoLocal) {
+    struct tm arrival = {};
+    if (sscanf(isoLocal.c_str(), "%d-%d-%dT%d:%d:%d", &arrival.tm_year, &arrival.tm_mon, &arrival.tm_mday,
+               &arrival.tm_hour, &arrival.tm_min, &arrival.tm_sec) != 6) {
+      return -1;
+    }
+
+    arrival.tm_year -= 1900;
+    arrival.tm_mon -= 1;
+    const time_t arrivalTime = mktime(&arrival);
+    const time_t now = time(nullptr);
+    if (arrivalTime <= 0 || now <= 0) {
+      return -1;
+    }
+
+    const long seconds = (long)difftime(arrivalTime, now);
+    return max(0L, (seconds + 30L) / 60L);
   }
 };

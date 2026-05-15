@@ -17,6 +17,11 @@ const liveConfig = {
   ]
 };
 
+if (window.dashboardLocalConfig) {
+  Object.assign(liveConfig.cta, window.dashboardLocalConfig.cta || {});
+  Object.assign(liveConfig.weather, window.dashboardLocalConfig.weather || {});
+}
+
 async function fetchJson(url) {
   const response = await fetch(url, { cache: "no-store" });
   if (!response.ok) {
@@ -105,16 +110,24 @@ async function loadCta(data) {
   });
 
   const payload = await fetchJson(url);
-  const arrivals = payload.ctatt.eta.slice(0, 3).map((eta) => {
+  const eta = payload.ctatt?.eta || [];
+  const routeOrder = [
+    { rt: "Red", badge: "R", tone: "red" },
+    { rt: "Brn", badge: "B", tone: "brown" },
+    { rt: "P", badge: "P", tone: "purple" }
+  ];
+
+  const arrivals = routeOrder.map((route, index) => {
+    const match = eta.find((arrival) => arrival.rt === route.rt);
+    if (!match) return data.cta.arrivals[index];
+
     const now = new Date();
-    const arrival = new Date(eta.arrT);
+    const arrival = new Date(match.arrT);
     const minutes = Math.max(0, Math.round((arrival - now) / 60000));
-    const badge = eta.rt?.slice(0, 1) || "?";
-    const tone = eta.rt === "Red" ? "red" : eta.rt === "Brn" ? "brown" : "purple";
-    return { badge, minutes: `${minutes} min`, tone };
+    return { badge: route.badge, minutes: `${minutes} min`, tone: route.tone };
   });
 
-  return arrivals.length ? { ...data.cta, arrivals } : data.cta;
+  return { ...data.cta, arrivals };
 }
 
 async function loadDashboardData(fallbackData = dashboardData) {
