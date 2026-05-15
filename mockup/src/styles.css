@@ -116,17 +116,10 @@ p {
   line-height: 1;
 }
 
-.weather-city {
-  margin-top: 12px;
-  color: var(--ink);
-  font-size: 16px;
-  font-weight: 580;
-}
-
 .weather-range {
-  margin-top: 8px;
+  margin-top: 18px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 560;
   white-space: nowrap;
 }

@@ -4,6 +4,7 @@
 #include <Arduino_GFX_Library.h>
 
 #include "config/AppConfig.h"
+#include "display/fonts/FreeSansBold10pt7b.h"
 
 namespace WaveshareLcdPins {
 // ESP32-S3-LCD-2 schematic mappings for the onboard ST7789T3 LCD.
@@ -54,6 +55,15 @@ class DisplayDriver {
   }
 
   void text(int16_t x, int16_t y, const String& value, uint8_t size, uint16_t color) {
+    gfx_->setFont(nullptr);
+    gfx_->setTextSize(size);
+    gfx_->setTextColor(color, BLACK);
+    gfx_->setCursor(x, y);
+    gfx_->print(value);
+  }
+
+  void textSans(int16_t x, int16_t y, const String& value, uint8_t size, uint16_t color) {
+    gfx_->setFont(&FreeSansBold10pt7b);
     gfx_->setTextSize(size);
     gfx_->setTextColor(color, BLACK);
     gfx_->setCursor(x, y);

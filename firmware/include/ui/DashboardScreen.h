@@ -66,16 +66,15 @@ class DashboardScreen {
   }
 
   void drawTimeSection(const DashboardSnapshot& data) {
-    display_.text(20, 28, data.time, 3, DashboardColor::white);
-    display_.text(92, 44, data.meridiem, 1, DashboardColor::muted);
-    display_.text(20, 76, data.date, 2, DashboardColor::muted);
+    display_.textSans(20, 56, data.time, 2, DashboardColor::white);
+    display_.text(102, 44, data.meridiem, 1, DashboardColor::muted);
+    display_.textSans(20, 94, data.date, 1, DashboardColor::muted);
   }
 
   void drawWeatherSection(const WeatherSnapshot& weather) {
-    display_.text(124, 28, weather.temperature, 4, DashboardColor::white);
-    display_.degreeMark(176, 30, DashboardColor::white);
-    display_.text(124, 76, weather.city, 2, DashboardColor::white);
-    display_.text(124, 106, "H " + weather.high + "  L " + weather.low, 1, DashboardColor::muted);
+    display_.textSans(136, 56, weather.temperature, 2, DashboardColor::white);
+    display_.degreeMark(188, 34, DashboardColor::white);
+    display_.textSans(124, 94, "H " + weather.high + "  L " + weather.low, 1, DashboardColor::muted);
   }
 
   void drawCTASection(const CtaSnapshot& cta) {
@@ -84,15 +83,15 @@ class DashboardScreen {
       const int16_t y = 50 + (i * 24);
       display_.circle(222, y + 7, 11, cta.arrivals[i].accentColor);
       display_.text(219, y + 3, cta.arrivals[i].badge, 1, DashboardColor::white);
-      display_.text(242, y + 2, cta.arrivals[i].nextArrival, 2, DashboardColor::white);
+      display_.textSans(242, y + 18, cta.arrivals[i].nextArrival, 1, DashboardColor::white);
     }
   }
 
   void drawMarketsStrip(const MarketSnapshot markets[3]) {
     const int16_t x[3] = {32, 132, 226};
     for (uint8_t i = 0; i < 3; i++) {
-      display_.text(x[i], 134, markets[i].label, 1, DashboardColor::white);
-      display_.text(x[i], 152, markets[i].percent, 1,
+      display_.textSans(x[i], 146, markets[i].label, 1, DashboardColor::white);
+      display_.textSans(x[i], 166, markets[i].percent, 1,
                     markets[i].positive ? DashboardColor::positive : DashboardColor::negative);
     }
   }
@@ -100,13 +99,13 @@ class DashboardScreen {
   void drawQuoteSection(const QuoteSnapshot& quote) {
     // Future quote API: if quotes exceed the display width, animate this line
     // horizontally as a ticker instead of clipping or shrinking it too far.
-    display_.text(24, 186, "\"" + quote.text + "\"", 1, DashboardColor::white);
-    display_.text(24, 206, "- " + quote.author, 1, DashboardColor::muted);
+    display_.textSans(24, 198, "\"" + quote.text + "\"", 1, DashboardColor::white);
+    display_.textSans(24, 218, "- " + quote.author, 1, DashboardColor::muted);
   }
 
   void drawPageIndicator() {
-    display_.circle(154, 222, 2, DashboardColor::white);
-    display_.circle(166, 222, 2, DashboardColor::muted);
+    display_.circle(154, 230, 2, DashboardColor::white);
+    display_.circle(166, 230, 2, DashboardColor::muted);
   }
 
   DisplayDriver& display_;
