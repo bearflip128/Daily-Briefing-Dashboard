@@ -63,15 +63,16 @@ class DashboardScreen {
   }
 
   void drawTimeSection(const DashboardSnapshot& data) {
-    display_.text(20, 24, data.time, 4, DashboardColor::white);
-    display_.text(84, 42, data.meridiem, 1, DashboardColor::muted);
+    display_.text(20, 28, data.time, 3, DashboardColor::white);
+    display_.text(92, 44, data.meridiem, 1, DashboardColor::muted);
     display_.text(20, 76, data.date, 2, DashboardColor::muted);
   }
 
   void drawWeatherSection(const WeatherSnapshot& weather) {
-    display_.text(128, 24, weather.temperature + " deg", 4, DashboardColor::white);
+    display_.text(130, 28, weather.temperature, 4, DashboardColor::white);
+    display_.degreeMark(182, 30, DashboardColor::white);
     display_.text(128, 76, weather.city, 2, DashboardColor::white);
-    display_.text(122, 104, "H " + weather.high + " deg  L " + weather.low + " deg", 1, DashboardColor::muted);
+    display_.text(124, 106, "H " + weather.high + "  L " + weather.low, 1, DashboardColor::muted);
   }
 
   void drawCTASection(const CtaSnapshot& cta) {
