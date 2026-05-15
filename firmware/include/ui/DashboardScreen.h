@@ -37,7 +37,6 @@ class DashboardScreen {
     const DashboardSnapshot data = dataService_.dashboard();
 
     display_.clear(DashboardColor::black);
-    drawRoundedFrame();
     drawDivider();
     drawTimeSection(data);
     drawWeatherSection(data.weather);
