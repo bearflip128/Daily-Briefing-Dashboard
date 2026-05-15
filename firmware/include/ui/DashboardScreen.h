@@ -33,7 +33,8 @@ class DashboardScreen {
   }
 
   void update() {
-    if (rendered_) {
+    const uint32_t now = millis();
+    if (rendered_ && now - lastRenderMs_ < AppConfig::liveDataRefreshMs) {
       return;
     }
 
@@ -48,6 +49,7 @@ class DashboardScreen {
     drawQuoteSection(data.quote);
     drawPageIndicator();
     rendered_ = true;
+    lastRenderMs_ = now;
   }
 
  private:
@@ -112,4 +114,5 @@ class DashboardScreen {
   DisplayDriver& display_;
   MockDataService& dataService_;
   bool rendered_ = false;
+  uint32_t lastRenderMs_ = 0;
 };

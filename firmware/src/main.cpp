@@ -14,6 +14,7 @@ void setup() {
   delay(500);
 
   display.begin();
+  dataService.begin();
   dashboard.begin();
 }
 

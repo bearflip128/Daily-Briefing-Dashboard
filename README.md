@@ -104,6 +104,16 @@ No real API credentials are required yet.
 - Copy `firmware/include/config/config.example.h` to `firmware/include/config/config.local.h` for future firmware credentials.
 - Keep local config files out of Git.
 
+The live data layer currently uses:
+
+- Time: device/browser clock, with NTP on firmware after WiFi connects.
+- Weather: Open-Meteo, no API key.
+- Markets: Stooq CSV quotes, no API key.
+- Quote: QuoteSlate, with Quotable fallback, no API key.
+- CTA: official CTA Train Tracker, requires `CTA_API_KEY`.
+
+Without WiFi credentials, firmware automatically falls back to bundled mock data. Without a CTA key, CTA arrivals stay on fallback values while other live sources can still update.
+
 ## Rendering Helpers
 
 Both tracks are organized around these helper ideas:

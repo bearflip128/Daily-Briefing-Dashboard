@@ -123,4 +123,10 @@ function renderDashboard(data) {
   drawPageIndicator();
 }
 
+async function refreshDashboard() {
+  renderDashboard(await loadDashboardData(dashboardData));
+}
+
 renderDashboard(dashboardData);
+refreshDashboard();
+window.setInterval(refreshDashboard, liveConfig.refreshMs);
