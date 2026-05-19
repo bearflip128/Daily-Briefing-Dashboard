@@ -85,10 +85,10 @@ class DashboardScreen {
   }
 
   void drawTimeSection(const DashboardSnapshot& data) {
-    display_.fillRect(18, 20, 96, 84, DashboardColor::black);
+    display_.fillRect(18, 20, 100, 96, DashboardColor::black);
     display_.textSans(20, 56, data.time, 2, DashboardColor::white);
     display_.text(102, 44, data.meridiem, 1, DashboardColor::muted);
-    display_.textSans(20, 94, data.date, 1, DashboardColor::muted);
+    display_.textSans(20, 108, data.date, 1, DashboardColor::muted);
   }
 
   void drawWifiIndicator(bool connected) {
