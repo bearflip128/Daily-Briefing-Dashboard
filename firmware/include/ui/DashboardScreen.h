@@ -115,8 +115,8 @@ class DashboardScreen {
       const int16_t y = 57 + (i * 20);
       display_.circle(222, y + 7, 9, cta.arrivals[i].accentColor);
       display_.text(219, y + 3, cta.arrivals[i].badge, 1, DashboardColor::white);
-      display_.text(244, y - 2, cta.arrivals[i].direction, 1, DashboardColor::muted);
-      display_.textSans(244, y + 17, cta.arrivals[i].nextArrival, 1, DashboardColor::white);
+      display_.textSans(242, y + 16, cta.arrivals[i].nextArrival, 1, DashboardColor::white);
+      display_.text(286, y + 8, cta.arrivals[i].direction, 1, DashboardColor::muted);
     }
   }
 

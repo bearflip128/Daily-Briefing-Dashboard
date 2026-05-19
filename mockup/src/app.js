@@ -62,10 +62,8 @@ function drawCTASection(cta) {
     .map(
       (arrival) => `<li>
         <span class="line-badge ${arrival.tone}">${arrival.badge}</span>
-        <span class="arrival-stack">
-          <span class="arrival-direction">${arrival.direction || ""}</span>
-          <span class="arrival-time">${arrival.minutes}</span>
-        </span>
+        <span class="arrival-time">${arrival.minutes}</span>
+        <span class="arrival-direction">${arrival.direction || ""}</span>
       </li>`
     )
     .join("");
