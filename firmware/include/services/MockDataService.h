@@ -27,6 +27,7 @@ struct CtaArrival {
 
 struct CtaSnapshot {
   String station;
+  String recommendation;
   CtaArrival arrivals[3];
 };
 
@@ -169,9 +170,10 @@ class MockDataService {
         false,
         {"43", "Chicago", "49", "36"},
         {"Fullerton",
-         {{"R", "4m", "How", DashboardColor::ctaRed},
-          {"B", "6m", "Loop", DashboardColor::ctaBrown},
-          {"P", "9m", "Ldn", DashboardColor::ctaPurple}}},
+         "WAIT 1m",
+         {{"R", "18m", "How", DashboardColor::ctaRed},
+          {"B", "22m", "Loop", DashboardColor::ctaBrown},
+          {"P", "27m", "Ldn", DashboardColor::ctaPurple}}},
         {{"S&P 500", "+0.71%", true},
          {"VXUS", "+0.42%", true},
          {"BTC", "-1.23%", false}},
@@ -332,40 +334,64 @@ class MockDataService {
       return;
     }
 
-    applyRouteArrival(body, "Red", snapshot.cta.arrivals[0]);
-    applyRouteArrival(body, "Brn", snapshot.cta.arrivals[1]);
-    applyRouteArrival(body, "P", snapshot.cta.arrivals[2]);
+    const int redMinutes = applyRouteArrival(body, "Red", snapshot.cta.arrivals[0]);
+    const int brownMinutes = applyRouteArrival(body, "Brn", snapshot.cta.arrivals[1]);
+    const int purpleMinutes = applyRouteArrival(body, "P", snapshot.cta.arrivals[2]);
+    snapshot.cta.recommendation = ctaRecommendation(redMinutes, brownMinutes, purpleMinutes);
 #else
     (void)snapshot;
 #endif
   }
 
-  static void applyRouteArrival(const String& body, const String& route, CtaArrival& arrival) {
+  static int applyRouteArrival(const String& body, const String& route, CtaArrival& arrival) {
     const String routeToken = "\"rt\":\"" + route + "\"";
-    const int routeIndex = body.indexOf(routeToken);
-    if (routeIndex < 0) {
+    int routeIndex = body.indexOf(routeToken);
+    int selectedMinutes = -1;
+    int selectedRouteIndex = -1;
+
+    while (routeIndex >= 0) {
+      const int predictionKey = body.indexOf("\"prdt\":\"", routeIndex);
+      const int arrivalKey = body.indexOf("\"arrT\":\"", routeIndex);
+      if (arrivalKey >= 0) {
+        const String arrivalTime = extractJsonStringAt(body, arrivalKey, "arrT");
+        const String predictionTime = predictionKey >= 0 ? extractJsonStringAt(body, predictionKey, "prdt") : "";
+        const int minutes = predictionTime.length() ? minutesBetween(predictionTime, arrivalTime) : minutesUntil(arrivalTime);
+        if (minutes >= ctaCatchableMinutes() && (selectedMinutes < 0 || minutes < selectedMinutes)) {
+          selectedMinutes = minutes;
+          selectedRouteIndex = routeIndex;
+        }
+      }
+      routeIndex = body.indexOf(routeToken, routeIndex + routeToken.length());
+    }
+
+    if (selectedMinutes < 0) {
       arrival.nextArrival = "--";
-      return;
+      arrival.direction = "";
+      return -1;
     }
 
-    const int predictionKey = body.indexOf("\"prdt\":\"", routeIndex);
-    const int arrivalKey = body.indexOf("\"arrT\":\"", routeIndex);
-    if (arrivalKey < 0) {
-      arrival.nextArrival = "--";
-      return;
+    arrival.nextArrival = String(selectedMinutes) + "m";
+    arrival.direction = compactCtaDirection(body, selectedRouteIndex);
+    return selectedMinutes;
+  }
+
+  static String ctaRecommendation(int redMinutes, int brownMinutes, int purpleMinutes) {
+    int soonest = -1;
+    const int values[3] = {redMinutes, brownMinutes, purpleMinutes};
+    for (uint8_t i = 0; i < 3; i++) {
+      if (values[i] >= 0 && (soonest < 0 || values[i] < soonest)) {
+        soonest = values[i];
+      }
     }
 
-    const String arrivalTime = extractJsonStringAt(body, arrivalKey, "arrT");
-    const String predictionTime = predictionKey >= 0 ? extractJsonStringAt(body, predictionKey, "prdt") : "";
-    if (!arrivalTime.length()) {
-      return;
-    }
+    if (soonest < 0) return "CTA LIVE";
 
-    const int minutes = predictionTime.length() ? minutesBetween(predictionTime, arrivalTime) : minutesUntil(arrivalTime);
-    if (minutes >= 0) {
-      arrival.nextArrival = String(minutes) + "m";
-    }
-    arrival.direction = compactCtaDirection(body, routeIndex);
+    const int waitMinutes = max(0, soonest - ctaCatchableMinutes());
+    return waitMinutes == 0 ? "LEAVE NOW" : "WAIT " + String(waitMinutes) + "m";
+  }
+
+  static constexpr int ctaCatchableMinutes() {
+    return AppConfig::ctaWalkMinutes + AppConfig::ctaComfortMinutes;
   }
 
   static String extractJsonStringAt(const String& body, int keyIndex, const String& key) {

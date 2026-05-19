@@ -109,12 +109,14 @@ class DashboardScreen {
 
   void drawCTASection(const CtaSnapshot& cta) {
     display_.text(212, 24, "CTA - " + cta.station, 1, DashboardColor::muted);
+    display_.text(214, 40, cta.recommendation, 1,
+                  cta.recommendation == "LEAVE NOW" ? DashboardColor::positive : DashboardColor::white);
     for (uint8_t i = 0; i < 3; i++) {
-      const int16_t y = 50 + (i * 24);
-      display_.circle(222, y + 7, 11, cta.arrivals[i].accentColor);
+      const int16_t y = 57 + (i * 20);
+      display_.circle(222, y + 7, 9, cta.arrivals[i].accentColor);
       display_.text(219, y + 3, cta.arrivals[i].badge, 1, DashboardColor::white);
-      display_.textSans(242, y + 18, cta.arrivals[i].nextArrival, 1, DashboardColor::white);
-      display_.text(276, y + 10, cta.arrivals[i].direction, 1, DashboardColor::muted);
+      display_.text(244, y - 2, cta.arrivals[i].direction, 1, DashboardColor::muted);
+      display_.textSans(244, y + 17, cta.arrivals[i].nextArrival, 1, DashboardColor::white);
     }
   }
 

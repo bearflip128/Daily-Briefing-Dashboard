@@ -1,5 +1,7 @@
 const liveConfig = {
   refreshMs: 60000,
+  ctaWalkMinutes: 15,
+  ctaComfortMinutes: 2,
   weather: {
     latitude: 41.8781,
     longitude: -87.6298,
@@ -120,6 +122,21 @@ function compactCtaDirection(arrival) {
   return arrival.trDr === "1" ? "N" : arrival.trDr === "5" ? "S" : "";
 }
 
+function ctaRecommendation(arrivals) {
+  const catchableMinutes = liveConfig.ctaWalkMinutes + liveConfig.ctaComfortMinutes;
+  const soonest = arrivals
+    .map((arrival) => arrival.rawMinutes)
+    .filter((minutes) => Number.isFinite(minutes))
+    .sort((a, b) => a - b)[0];
+
+  if (!Number.isFinite(soonest)) {
+    return "CTA LIVE";
+  }
+
+  const wait = Math.max(0, soonest - catchableMinutes);
+  return wait === 0 ? "LEAVE NOW" : `WAIT ${wait}m`;
+}
+
 async function loadMarket(market) {
   const canUseLocalProxy = window.location.protocol.startsWith("http");
   const url = canUseLocalProxy
@@ -192,21 +209,27 @@ async function loadCta(data) {
   ];
 
   const arrivals = routeOrder.map((route, index) => {
-    const match = eta.find((arrival) => arrival.rt === route.rt);
+    const catchableMinutes = liveConfig.ctaWalkMinutes + liveConfig.ctaComfortMinutes;
+    const match = eta
+      .filter((arrival) => arrival.rt === route.rt)
+      .map((arrival) => ({ arrival, minutes: minutesBetween(arrival.prdt, arrival.arrT) }))
+      .filter((candidate) => Number.isFinite(candidate.minutes) && candidate.minutes >= catchableMinutes)
+      .sort((a, b) => a.minutes - b.minutes)[0];
+
     if (!match) {
-      return { ...data.cta.arrivals[index], minutes: "--" };
+      return { badge: route.badge, minutes: "--", rawMinutes: null, direction: "", tone: route.tone };
     }
 
-    const minutes = minutesBetween(match.prdt, match.arrT);
     return {
       badge: route.badge,
-      minutes: minutes === null ? "--" : `${minutes}m`,
-      direction: compactCtaDirection(match),
+      minutes: `${match.minutes}m`,
+      rawMinutes: match.minutes,
+      direction: compactCtaDirection(match.arrival),
       tone: route.tone
     };
   });
 
-  return { ...data.cta, arrivals };
+  return { ...data.cta, recommendation: ctaRecommendation(arrivals), arrivals };
 }
 
 async function loadDashboardData(fallbackData = dashboardData) {
