@@ -34,6 +34,13 @@ class DashboardScreen {
 
   void update() {
     const uint32_t now = millis();
+    if (rendered_ && now - lastClockRenderMs_ >= clockRefreshMs_) {
+      dataService_.refreshClock(currentData_);
+      drawTimeSection(currentData_);
+      drawWifiIndicator(currentData_.wifiConnected);
+      lastClockRenderMs_ = now;
+    }
+
     if (rendered_ && now - lastQuoteRenderMs_ >= quoteTickerMs_) {
       drawQuoteSection(currentData_.quote);
       lastQuoteRenderMs_ = now;
@@ -54,10 +61,12 @@ class DashboardScreen {
     drawCTASection(currentData_.cta);
     drawMarketsStrip(currentData_.markets);
     drawQuoteSection(currentData_.quote);
+    drawWifiIndicator(currentData_.wifiConnected);
     drawPageIndicator();
     rendered_ = true;
     lastDataRefreshMs_ = now;
     lastQuoteRenderMs_ = now;
+    lastClockRenderMs_ = now;
   }
 
  private:
@@ -76,9 +85,15 @@ class DashboardScreen {
   }
 
   void drawTimeSection(const DashboardSnapshot& data) {
+    display_.fillRect(18, 20, 96, 84, DashboardColor::black);
     display_.textSans(20, 56, data.time, 2, DashboardColor::white);
     display_.text(102, 44, data.meridiem, 1, DashboardColor::muted);
     display_.textSans(20, 94, data.date, 1, DashboardColor::muted);
+  }
+
+  void drawWifiIndicator(bool connected) {
+    display_.fillRect(300, 14, 12, 12, DashboardColor::black);
+    display_.circle(306, 20, 4, connected ? DashboardColor::positive : DashboardColor::negative);
   }
 
   void drawWeatherSection(const WeatherSnapshot& weather) {
@@ -137,6 +152,8 @@ class DashboardScreen {
   bool rendered_ = false;
   uint32_t lastDataRefreshMs_ = 0;
   uint32_t lastQuoteRenderMs_ = 0;
+  uint32_t lastClockRenderMs_ = 0;
   uint16_t quoteOffset_ = 0;
   static constexpr uint16_t quoteTickerMs_ = 120;
+  static constexpr uint16_t clockRefreshMs_ = 1000;
 };

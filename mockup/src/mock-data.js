@@ -4,6 +4,9 @@ const dashboardData = {
     meridiem: "PM",
     date: "Tue, May 12"
   },
+  status: {
+    wifiConnected: false
+  },
   weather: {
     temp: "43&deg;",
     city: "Chicago",

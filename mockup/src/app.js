@@ -34,6 +34,13 @@ function drawTimeSection(time) {
   );
 }
 
+function drawWifiIndicator(status) {
+  dashboard.insertAdjacentHTML(
+    "beforeend",
+    `<div class="wifi-indicator ${status.wifiConnected ? "online" : "offline"}" aria-label="${status.wifiConnected ? "WiFi connected" : "WiFi disconnected"}"></div>`
+  );
+}
+
 function drawWeatherSection(weather) {
   dashboard.insertAdjacentHTML(
     "beforeend",
@@ -126,7 +133,25 @@ function renderDashboard(data) {
   drawCTASection(data.cta);
   drawMarketsStrip(data.markets);
   drawQuoteSection(data.quote);
+  drawWifiIndicator(data.status);
   drawPageIndicator();
+}
+
+function refreshClockOnly() {
+  const time = loadTime(dashboardData);
+  const status = loadStatus(dashboardData);
+  const timeValue = dashboard.querySelector(".time-value");
+  const meridiem = dashboard.querySelector(".time-meridiem");
+  const dateLine = dashboard.querySelector(".date-line");
+  const indicator = dashboard.querySelector(".wifi-indicator");
+
+  if (timeValue) timeValue.textContent = time.hourMinute;
+  if (meridiem) meridiem.textContent = time.meridiem;
+  if (dateLine) dateLine.textContent = time.date;
+  if (indicator) {
+    indicator.className = `wifi-indicator ${status.wifiConnected ? "online" : "offline"}`;
+    indicator.setAttribute("aria-label", status.wifiConnected ? "WiFi connected" : "WiFi disconnected");
+  }
 }
 
 async function refreshDashboard() {
@@ -135,4 +160,5 @@ async function refreshDashboard() {
 
 renderDashboard(dashboardData);
 refreshDashboard();
+window.setInterval(refreshClockOnly, 1000);
 window.setInterval(refreshDashboard, liveConfig.refreshMs);

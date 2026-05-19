@@ -64,6 +64,23 @@ p {
   background: var(--divider);
 }
 
+.wifi-indicator {
+  position: absolute;
+  left: 302px;
+  top: 16px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.wifi-indicator.online {
+  background: var(--positive);
+}
+
+.wifi-indicator.offline {
+  background: var(--negative);
+}
+
 .time-section,
 .weather-section,
 .cta-section,

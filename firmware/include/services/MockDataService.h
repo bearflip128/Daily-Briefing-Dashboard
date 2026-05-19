@@ -45,6 +45,7 @@ struct DashboardSnapshot {
   String time;
   String meridiem;
   String date;
+  bool wifiConnected;
   WeatherSnapshot weather;
   CtaSnapshot cta;
   MarketSnapshot markets[3];
@@ -94,13 +95,16 @@ class MockDataService {
 #endif
   }
 
-  DashboardSnapshot dashboard() const {
+  DashboardSnapshot dashboard() {
     DashboardSnapshot snapshot = fallbackDashboard();
+    maintainWiFi();
 
     if (WiFi.status() != WL_CONNECTED) {
+      snapshot.wifiConnected = false;
       return snapshot;
     }
 
+    snapshot.wifiConnected = true;
     applyLiveTime(snapshot);
     applyLiveWeather(snapshot);
     applyLiveMarkets(snapshot);
@@ -109,7 +113,33 @@ class MockDataService {
     return snapshot;
   }
 
+  void refreshClock(DashboardSnapshot& snapshot) {
+    maintainWiFi();
+    snapshot.wifiConnected = WiFi.status() == WL_CONNECTED;
+    if (snapshot.wifiConnected) {
+      applyLiveTime(snapshot);
+    }
+  }
+
  private:
+  void maintainWiFi() {
+#if defined(WIFI_SSID) && defined(WIFI_PASSWORD)
+    if (WiFi.status() == WL_CONNECTED) {
+      return;
+    }
+
+    const uint32_t now = millis();
+    if (now - lastReconnectAttemptMs_ < 30000) {
+      return;
+    }
+
+    lastReconnectAttemptMs_ = now;
+    Serial.println("WiFi disconnected; attempting reconnect.");
+    WiFi.disconnect();
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+#endif
+  }
+
   static void printConfiguredNetworkScan() {
 #if defined(WIFI_SSID)
     Serial.println("Scanning for configured WiFi SSID...");
@@ -136,6 +166,7 @@ class MockDataService {
         "5:37",
         "PM",
         "Tue, May 12",
+        false,
         {"43", "Chicago", "49", "36"},
         {"Fullerton",
          {{"R", "4m", "How", DashboardColor::ctaRed},
@@ -388,4 +419,6 @@ class MockDataService {
     arrival.tm_mon -= 1;
     return mktime(&arrival);
   }
+
+  uint32_t lastReconnectAttemptMs_ = 0;
 };

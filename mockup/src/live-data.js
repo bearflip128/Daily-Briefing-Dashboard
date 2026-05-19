@@ -53,6 +53,13 @@ function loadTime(data) {
   };
 }
 
+function loadStatus(data) {
+  return {
+    ...data.status,
+    wifiConnected: navigator.onLine
+  };
+}
+
 async function loadWeather(data) {
   const { latitude, longitude, timezone } = liveConfig.weather;
   const canUseLocalProxy = window.location.protocol.startsWith("http");
@@ -205,6 +212,7 @@ async function loadCta(data) {
 async function loadDashboardData(fallbackData = dashboardData) {
   const next = structuredClone(fallbackData);
   next.time = loadTime(next);
+  next.status = loadStatus(next);
 
   const [weather, markets, quote, cta] = await Promise.allSettled([
     loadWeather(next),
