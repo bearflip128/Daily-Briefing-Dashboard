@@ -98,7 +98,6 @@ async function handleWeatherProxy(request, response) {
 async function handleQuoteProxy(response) {
   const urls = [
     "https://quoteslate.vercel.app/api/quotes/random?maxLength=45",
-    "https://api.quotable.io/random?maxLength=45",
     "https://dummyjson.com/quotes/random"
   ];
 

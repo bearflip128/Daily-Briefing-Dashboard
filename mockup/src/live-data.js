@@ -127,19 +127,11 @@ async function loadQuote(data) {
       author: quote.author || data.quote.author
     };
   } catch {
-    try {
-      const quote = await fetchJson("https://api.quotable.io/random?maxLength=45");
-      return {
-        text: quote.content || data.quote.text,
-        author: quote.author || data.quote.author
-      };
-    } catch {
-      const quote = await fetchJson("https://dummyjson.com/quotes/random");
-      return {
-        text: quote.quote || data.quote.text,
-        author: quote.author || data.quote.author
-      };
-    }
+    const quote = await fetchJson("https://dummyjson.com/quotes/random");
+    return {
+      text: quote.quote || data.quote.text,
+      author: quote.author || data.quote.author
+    };
   }
 }
 

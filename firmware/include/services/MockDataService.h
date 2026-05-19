@@ -281,9 +281,7 @@ class MockDataService {
   static void applyLiveQuote(DashboardSnapshot& snapshot) {
     String body;
     if (!getHttps("https://quoteslate.vercel.app/api/quotes/random?maxLength=45", body)) {
-      if (!getHttps("https://api.quotable.io/random?maxLength=45", body)) {
-        getHttps("https://dummyjson.com/quotes/random", body);
-      }
+      getHttps("https://dummyjson.com/quotes/random", body);
     }
 
     const String text = extractJsonString(body, "quote").length() ? extractJsonString(body, "quote")
