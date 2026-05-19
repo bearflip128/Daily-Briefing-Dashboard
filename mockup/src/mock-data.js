@@ -13,9 +13,9 @@ const dashboardData = {
   cta: {
     station: "Fullerton",
     arrivals: [
-      { badge: "R", minutes: "4 min", tone: "red" },
-      { badge: "B", minutes: "6 min", tone: "brown" },
-      { badge: "P", minutes: "9 min", tone: "purple" }
+      { badge: "R", minutes: "4 min", direction: "How", tone: "red" },
+      { badge: "B", minutes: "6 min", direction: "Loop", tone: "brown" },
+      { badge: "P", minutes: "9 min", direction: "Ldn", tone: "purple" }
     ]
   },
   markets: [

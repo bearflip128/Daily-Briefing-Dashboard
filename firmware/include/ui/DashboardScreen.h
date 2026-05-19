@@ -34,22 +34,30 @@ class DashboardScreen {
 
   void update() {
     const uint32_t now = millis();
-    if (rendered_ && now - lastRenderMs_ < AppConfig::liveDataRefreshMs) {
+    if (rendered_ && now - lastQuoteRenderMs_ >= quoteTickerMs_) {
+      drawQuoteSection(currentData_.quote);
+      lastQuoteRenderMs_ = now;
+      quoteOffset_ = (quoteOffset_ + 3) % quoteCycleWidth(currentData_.quote);
+    }
+
+    if (rendered_ && now - lastDataRefreshMs_ < AppConfig::liveDataRefreshMs) {
       return;
     }
 
-    const DashboardSnapshot data = dataService_.dashboard();
+    currentData_ = dataService_.dashboard();
+    quoteOffset_ = 0;
 
     display_.clear(DashboardColor::black);
     drawDivider();
-    drawTimeSection(data);
-    drawWeatherSection(data.weather);
-    drawCTASection(data.cta);
-    drawMarketsStrip(data.markets);
-    drawQuoteSection(data.quote);
+    drawTimeSection(currentData_);
+    drawWeatherSection(currentData_.weather);
+    drawCTASection(currentData_.cta);
+    drawMarketsStrip(currentData_.markets);
+    drawQuoteSection(currentData_.quote);
     drawPageIndicator();
     rendered_ = true;
-    lastRenderMs_ = now;
+    lastDataRefreshMs_ = now;
+    lastQuoteRenderMs_ = now;
   }
 
  private:
@@ -74,11 +82,13 @@ class DashboardScreen {
   }
 
   void drawWeatherSection(const WeatherSnapshot& weather) {
-    display_.textSans(146, 44, weather.temperature, 2, DashboardColor::white);
-    display_.degreeMark(198, 22, DashboardColor::white);
-    display_.circle(130, 79, 8, DashboardColor::divider);
-    display_.text(126, 75, "H", 1, DashboardColor::muted);
-    display_.textSans(146, 88, weather.high, 2, DashboardColor::white);
+    display_.circle(136, 36, 7, DashboardColor::divider);
+    display_.text(132, 32, "C", 1, DashboardColor::muted);
+    display_.textSans(152, 46, weather.temperature, 2, DashboardColor::white);
+    display_.degreeMark(198, 24, DashboardColor::white);
+    display_.circle(136, 78, 7, DashboardColor::divider);
+    display_.text(132, 74, "H", 1, DashboardColor::muted);
+    display_.textSans(152, 88, weather.high, 2, DashboardColor::white);
     display_.degreeMark(198, 66, DashboardColor::white);
   }
 
@@ -89,6 +99,7 @@ class DashboardScreen {
       display_.circle(222, y + 7, 11, cta.arrivals[i].accentColor);
       display_.text(219, y + 3, cta.arrivals[i].badge, 1, DashboardColor::white);
       display_.textSans(242, y + 18, cta.arrivals[i].nextArrival, 1, DashboardColor::white);
+      display_.text(276, y + 10, cta.arrivals[i].direction, 1, DashboardColor::muted);
     }
   }
 
@@ -102,10 +113,11 @@ class DashboardScreen {
   }
 
   void drawQuoteSection(const QuoteSnapshot& quote) {
-    // Future quote API: if quotes exceed the display width, animate this line
-    // horizontally as a ticker instead of clipping or shrinking it too far.
-    display_.textSans(24, 198, "\"" + quote.text + "\"", 1, DashboardColor::white);
-    display_.textSans(24, 218, "- " + quote.author, 1, DashboardColor::muted);
+    display_.fillRect(20, 176, 280, 46, DashboardColor::black);
+    const String ticker = "\"" + quote.text + "\" - " + quote.author;
+    const int16_t textWidth = ticker.length() * 11;
+    const int16_t x = textWidth <= 270 ? 24 : 300 - quoteOffset_;
+    display_.textSans(x, 205, ticker, 1, DashboardColor::white);
   }
 
   void drawPageIndicator() {
@@ -113,8 +125,18 @@ class DashboardScreen {
     display_.circle(166, 230, 2, DashboardColor::muted);
   }
 
+  uint16_t quoteCycleWidth(const QuoteSnapshot& quote) const {
+    const String ticker = "\"" + quote.text + "\" - " + quote.author;
+    const uint16_t estimate = ticker.length() * 11;
+    return max((uint16_t)300, (uint16_t)(estimate + 320));
+  }
+
   DisplayDriver& display_;
   MockDataService& dataService_;
+  DashboardSnapshot currentData_;
   bool rendered_ = false;
-  uint32_t lastRenderMs_ = 0;
+  uint32_t lastDataRefreshMs_ = 0;
+  uint32_t lastQuoteRenderMs_ = 0;
+  uint16_t quoteOffset_ = 0;
+  static constexpr uint16_t quoteTickerMs_ = 120;
 };

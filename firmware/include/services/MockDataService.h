@@ -21,6 +21,7 @@ struct WeatherSnapshot {
 struct CtaArrival {
   String badge;
   String nextArrival;
+  String direction;
   uint16_t accentColor;
 };
 
@@ -137,9 +138,9 @@ class MockDataService {
         "Tue, May 12",
         {"43", "Chicago", "49", "36"},
         {"Fullerton",
-         {{"R", "4 min", DashboardColor::ctaRed},
-          {"B", "6 min", DashboardColor::ctaBrown},
-          {"P", "9 min", DashboardColor::ctaPurple}}},
+         {{"R", "4m", "How", DashboardColor::ctaRed},
+          {"B", "6m", "Loop", DashboardColor::ctaBrown},
+          {"P", "9m", "Ldn", DashboardColor::ctaPurple}}},
         {{"S&P 500", "+0.71%", true},
          {"VXUS", "+0.42%", true},
          {"BTC", "-1.23%", false}},
@@ -316,34 +317,57 @@ class MockDataService {
       return;
     }
 
+    const int predictionKey = body.indexOf("\"prdt\":\"", routeIndex);
     const int arrivalKey = body.indexOf("\"arrT\":\"", routeIndex);
     if (arrivalKey < 0) {
       arrival.nextArrival = "--";
       return;
     }
 
-    const int start = arrivalKey + 8;
-    const int end = body.indexOf('"', start);
-    if (end < 0) {
+    const String arrivalTime = extractJsonStringAt(body, arrivalKey, "arrT");
+    const String predictionTime = predictionKey >= 0 ? extractJsonStringAt(body, predictionKey, "prdt") : "";
+    if (!arrivalTime.length()) {
       return;
     }
 
-    const int minutes = minutesUntil(body.substring(start, end));
+    const int minutes = predictionTime.length() ? minutesBetween(predictionTime, arrivalTime) : minutesUntil(arrivalTime);
     if (minutes >= 0) {
-      arrival.nextArrival = String(minutes) + " min";
+      arrival.nextArrival = String(minutes) + "m";
     }
+    arrival.direction = compactCtaDirection(body, routeIndex);
+  }
+
+  static String extractJsonStringAt(const String& body, int keyIndex, const String& key) {
+    (void)key;
+    if (keyIndex < 0) return "";
+    const int colon = body.indexOf(':', keyIndex);
+    const int start = body.indexOf('"', colon + 1);
+    const int end = body.indexOf('"', start + 1);
+    if (start < 0 || end < 0) return "";
+    return body.substring(start + 1, end);
+  }
+
+  static String compactCtaDirection(const String& body, int routeIndex) {
+    const String dest = extractJsonStringAt(body, body.indexOf("\"destNm\":\"", routeIndex), "destNm");
+    const String stop = extractJsonStringAt(body, body.indexOf("\"stpDe\":\"", routeIndex), "stpDe");
+    const String value = dest.length() ? dest : stop;
+    if (value.indexOf("95th") >= 0) return "95";
+    if (value.indexOf("Howard") >= 0) return "How";
+    if (value.indexOf("Loop") >= 0) return "Loop";
+    if (value.indexOf("Kimball") >= 0) return "Kim";
+    if (value.indexOf("Linden") >= 0) return "Ldn";
+    return "";
+  }
+
+  static int minutesBetween(const String& startLocal, const String& arrivalLocal) {
+    const time_t start = parseLocalTime(startLocal);
+    const time_t arrival = parseLocalTime(arrivalLocal);
+    if (start <= 0 || arrival <= 0) return -1;
+    return max(0L, ((long)difftime(arrival, start) + 30L) / 60L);
   }
 
   static int minutesUntil(const String& isoLocal) {
-    struct tm arrival = {};
-    if (sscanf(isoLocal.c_str(), "%d-%d-%dT%d:%d:%d", &arrival.tm_year, &arrival.tm_mon, &arrival.tm_mday,
-               &arrival.tm_hour, &arrival.tm_min, &arrival.tm_sec) != 6) {
-      return -1;
-    }
-
-    arrival.tm_year -= 1900;
-    arrival.tm_mon -= 1;
-    const time_t arrivalTime = mktime(&arrival);
+    const time_t arrivalTime = parseLocalTime(isoLocal);
     const time_t now = time(nullptr);
     if (arrivalTime <= 0 || now <= 0) {
       return -1;
@@ -351,5 +375,17 @@ class MockDataService {
 
     const long seconds = (long)difftime(arrivalTime, now);
     return max(0L, (seconds + 30L) / 60L);
+  }
+
+  static time_t parseLocalTime(const String& isoLocal) {
+    struct tm arrival = {};
+    if (sscanf(isoLocal.c_str(), "%d-%d-%dT%d:%d:%d", &arrival.tm_year, &arrival.tm_mon, &arrival.tm_mday,
+               &arrival.tm_hour, &arrival.tm_min, &arrival.tm_sec) != 6) {
+      return 0;
+    }
+
+    arrival.tm_year -= 1900;
+    arrival.tm_mon -= 1;
+    return mktime(&arrival);
   }
 };

@@ -94,6 +94,25 @@ function parseStooqCsv(csv) {
   };
 }
 
+function minutesBetween(startTime, arrivalTime) {
+  const start = new Date(startTime);
+  const arrival = new Date(arrivalTime);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(arrival.getTime())) {
+    return null;
+  }
+  return Math.max(0, Math.round((arrival - start) / 60000));
+}
+
+function compactCtaDirection(arrival) {
+  const destination = arrival.destNm || arrival.stpDe || "";
+  if (destination.includes("95th")) return "95";
+  if (destination.includes("Howard")) return "How";
+  if (destination.includes("Loop")) return "Loop";
+  if (destination.includes("Kimball")) return "Kim";
+  if (destination.includes("Linden")) return "Ldn";
+  return arrival.trDr === "1" ? "N" : arrival.trDr === "5" ? "S" : "";
+}
+
 async function loadMarket(market) {
   const canUseLocalProxy = window.location.protocol.startsWith("http");
   const url = canUseLocalProxy
@@ -171,10 +190,13 @@ async function loadCta(data) {
       return { ...data.cta.arrivals[index], minutes: "--" };
     }
 
-    const now = new Date();
-    const arrival = new Date(match.arrT);
-    const minutes = Math.max(0, Math.round((arrival - now) / 60000));
-    return { badge: route.badge, minutes: `${minutes} min`, tone: route.tone };
+    const minutes = minutesBetween(match.prdt, match.arrT);
+    return {
+      badge: route.badge,
+      minutes: minutes === null ? "--" : `${minutes}m`,
+      direction: compactCtaDirection(match),
+      tone: route.tone
+    };
   });
 
   return { ...data.cta, arrivals };

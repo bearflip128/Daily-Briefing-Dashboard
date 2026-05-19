@@ -68,6 +68,13 @@ Then open `http://127.0.0.1:5173`.
 
 You can still open `mockup/index.html` directly in a browser for static layout work, but some live APIs may fall back to mock data from `file://`.
 
+Run the mock API smoke test while the local server is running:
+
+```bash
+cd mockup
+npm run test:api
+```
+
 Vite is optional if you want the standard Vite workflow:
 
 ```bash
@@ -93,6 +100,15 @@ Flash when the board is connected:
 pio run --target upload
 pio device monitor
 ```
+
+After the first serial flash, the firmware starts ArduinoOTA when WiFi connects. Future LAN updates can be sent with:
+
+```bash
+cd firmware
+pio run -e waveshare_esp32_s3_display_ota --target upload
+```
+
+If mDNS does not resolve `daily-briefing-dashboard.local`, set `upload_port` in `firmware/platformio.ini` to the IP printed in the serial log.
 
 The current firmware scaffold compiles around a placeholder `DisplayDriver` that logs drawing calls over serial. This keeps the UI source readable while isolating board-specific display setup.
 
@@ -122,6 +138,8 @@ The live data layer currently uses:
 - CTA: official CTA Train Tracker, requires `CTA_API_KEY`.
 
 Without WiFi credentials, firmware automatically falls back to bundled mock data. Without a CTA key, CTA arrivals stay on fallback values while other live sources can still update.
+
+Optional OTA password protection can be added locally with `#define OTA_PASSWORD "..."` in `firmware/include/config/config.local.h`.
 
 ## Rendering Helpers
 

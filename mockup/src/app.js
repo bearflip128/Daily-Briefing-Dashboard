@@ -39,10 +39,11 @@ function drawWeatherSection(weather) {
     "beforeend",
     `<section class="weather-section" style="left:124px; top:${UI.regions.top.y}px">
       <div class="weather-current">
+        <span class="weather-marker">C</span>
         <span class="weather-temp">${weather.temp}</span>
       </div>
       <div class="weather-high">
-        <span class="weather-high-marker">H</span>
+        <span class="weather-marker">H</span>
         <span class="weather-temp">${weather.high}</span>
       </div>
     </section>`
@@ -55,6 +56,7 @@ function drawCTASection(cta) {
       (arrival) => `<li>
         <span class="line-badge ${arrival.tone}">${arrival.badge}</span>
         <span class="arrival-time">${arrival.minutes}</span>
+        <span class="arrival-direction">${arrival.direction || ""}</span>
       </li>`
     )
     .join("");
@@ -90,8 +92,9 @@ function drawQuoteSection(quote) {
   dashboard.insertAdjacentHTML(
     "beforeend",
     `<section class="quote-section" style="left:${region.x}px; top:${region.y}px">
-      <p class="quote-text">&ldquo;${quote.text}&rdquo;</p>
-      <p class="quote-author">&mdash; ${quote.author}</p>
+      <div class="quote-ticker">
+        <p class="quote-text">&ldquo;${quote.text}&rdquo; &mdash; ${quote.author}</p>
+      </div>
     </section>`
   );
 }

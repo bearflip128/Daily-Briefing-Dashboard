@@ -112,29 +112,29 @@ p {
 .weather-high {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 5px;
   margin-top: 0;
 }
 
 .weather-high {
-  margin-top: 8px;
+  margin-top: 7px;
 }
 
-.weather-high-marker {
+.weather-marker {
   display: inline-grid;
   place-items: center;
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   border: 1px solid var(--muted);
   border-radius: 50%;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
 }
 
 .weather-temp {
   color: var(--ink);
-  font-size: 31px;
+  font-size: 29px;
   font-weight: 640;
   line-height: 1;
 }
@@ -160,9 +160,9 @@ p {
 
 .cta-list li {
   display: grid;
-  grid-template-columns: 24px auto;
+  grid-template-columns: 22px 32px 1fr;
   align-items: center;
-  gap: 9px;
+  gap: 6px;
   color: var(--ink);
   font-size: 16px;
   line-height: 1;
@@ -194,8 +194,15 @@ p {
 .arrival-time {
   color: var(--ink);
   white-space: nowrap;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 650;
+}
+
+.arrival-direction {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .markets-strip {
@@ -237,6 +244,12 @@ p {
 .quote-section {
   width: 280px;
   text-align: left;
+  overflow: hidden;
+}
+
+.quote-ticker {
+  width: 280px;
+  overflow: hidden;
 }
 
 .quote-text {
@@ -245,13 +258,9 @@ p {
   font-weight: 520;
   line-height: 1.16;
   white-space: nowrap;
-}
-
-.quote-author {
-  margin-top: 7px;
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 520;
+  width: max-content;
+  min-width: 100%;
+  animation: quote-scroll 18s linear infinite;
 }
 
 .page-indicator {
@@ -274,4 +283,13 @@ p {
 .dot.active {
   border-color: var(--ink);
   background: var(--ink);
+}
+
+@keyframes quote-scroll {
+  0%, 12% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-100% - 24px));
+  }
 }

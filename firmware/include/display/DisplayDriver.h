@@ -46,6 +46,10 @@ class DisplayDriver {
     gfx_->fillScreen(color);
   }
 
+  void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
+    gfx_->fillRect(x, y, w, h, color);
+  }
+
   void roundedRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t radius, uint16_t color) {
     gfx_->drawRoundRect(x, y, w, h, radius, color);
   }
