@@ -22,7 +22,7 @@ class DisplayDriver {
   DisplayDriver()
       : bus_(new Arduino_ESP32SPI(WaveshareLcdPins::dc, WaveshareLcdPins::cs, WaveshareLcdPins::sclk,
                                   WaveshareLcdPins::mosi, WaveshareLcdPins::miso)),
-        gfx_(new Arduino_ST7789(bus_, WaveshareLcdPins::rst, 1 /* landscape */, true /* IPS */, 240, 320)) {}
+        gfx_(new Arduino_ST7789(bus_, WaveshareLcdPins::rst, 3 /* landscape, 180 flipped */, true /* IPS */, 240, 320)) {}
 
   void begin() {
     Serial.println();
