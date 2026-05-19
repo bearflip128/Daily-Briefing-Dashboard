@@ -277,7 +277,16 @@ p {
   white-space: nowrap;
   width: max-content;
   min-width: 100%;
-  animation: quote-scroll 18s linear infinite;
+  animation: quote-scroll 10s linear infinite;
+}
+
+.quote-author {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 520;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .page-indicator {

@@ -100,8 +100,9 @@ function drawQuoteSection(quote) {
     "beforeend",
     `<section class="quote-section" style="left:${region.x}px; top:${region.y}px">
       <div class="quote-ticker">
-        <p class="quote-text">&ldquo;${quote.text}&rdquo; &mdash; ${quote.author}</p>
+        <p class="quote-text">&ldquo;${quote.text}&rdquo;</p>
       </div>
+      <p class="quote-author">&mdash; ${quote.author}</p>
     </section>`
   );
 }

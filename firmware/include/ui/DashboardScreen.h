@@ -44,7 +44,7 @@ class DashboardScreen {
     if (rendered_ && now - lastQuoteRenderMs_ >= quoteTickerMs_) {
       drawQuoteSection(currentData_.quote);
       lastQuoteRenderMs_ = now;
-      quoteOffset_ = (quoteOffset_ + 3) % quoteCycleWidth(currentData_.quote);
+      quoteOffset_ = (quoteOffset_ + quoteTickerStep_) % quoteCycleWidth(currentData_.quote);
     }
 
     if (rendered_ && now - lastDataRefreshMs_ < AppConfig::liveDataRefreshMs) {
@@ -129,10 +129,11 @@ class DashboardScreen {
 
   void drawQuoteSection(const QuoteSnapshot& quote) {
     display_.fillRect(20, 176, 280, 46, DashboardColor::black);
-    const String ticker = "\"" + quote.text + "\" - " + quote.author;
+    const String ticker = "\"" + quote.text + "\"";
     const int16_t textWidth = ticker.length() * 11;
     const int16_t x = textWidth <= 270 ? 24 : 300 - quoteOffset_;
-    display_.textSans(x, 205, ticker, 1, DashboardColor::white);
+    display_.textSans(x, 198, ticker, 1, DashboardColor::white);
+    display_.textSans(24, 218, "- " + quote.author, 1, DashboardColor::muted);
   }
 
   void drawPageIndicator() {
@@ -141,7 +142,7 @@ class DashboardScreen {
   }
 
   uint16_t quoteCycleWidth(const QuoteSnapshot& quote) const {
-    const String ticker = "\"" + quote.text + "\" - " + quote.author;
+    const String ticker = "\"" + quote.text + "\"";
     const uint16_t estimate = ticker.length() * 11;
     return max((uint16_t)300, (uint16_t)(estimate + 320));
   }
@@ -154,6 +155,7 @@ class DashboardScreen {
   uint32_t lastQuoteRenderMs_ = 0;
   uint32_t lastClockRenderMs_ = 0;
   uint16_t quoteOffset_ = 0;
-  static constexpr uint16_t quoteTickerMs_ = 120;
+  static constexpr uint16_t quoteTickerMs_ = 60;
+  static constexpr uint8_t quoteTickerStep_ = 4;
   static constexpr uint16_t clockRefreshMs_ = 1000;
 };
