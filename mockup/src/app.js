@@ -38,6 +38,9 @@ function drawWeatherSection(weather) {
   dashboard.insertAdjacentHTML(
     "beforeend",
     `<section class="weather-section" style="left:124px; top:${UI.regions.top.y}px">
+      <div class="weather-current">
+        <span class="weather-temp">${weather.temp}</span>
+      </div>
       <div class="weather-high">
         <span class="weather-high-marker">H</span>
         <span class="weather-temp">${weather.high}</span>

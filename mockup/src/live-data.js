@@ -3,7 +3,8 @@ const liveConfig = {
   weather: {
     latitude: 41.8781,
     longitude: -87.6298,
-    timezone: "America/Chicago"
+    timezone: "America/Chicago",
+    proxyUrl: "/api/weather"
   },
   cta: {
     // CTA Train Tracker requires a key. Add one here or in config.local.json.
@@ -12,9 +13,9 @@ const liveConfig = {
     proxyUrl: "/api/cta"
   },
   markets: [
-    { label: "S&P 500", stooq: "^spx" },
-    { label: "VXUS", stooq: "vxus.us" },
-    { label: "BTC", stooq: "btcusd" }
+    { label: "S&P 500", stooq: "^spx", proxyUrl: "/api/market" },
+    { label: "VXUS", stooq: "vxus.us", proxyUrl: "/api/market" },
+    { label: "BTC", stooq: "btcusd", proxyUrl: "/api/market" }
   ]
 };
 
@@ -31,12 +32,37 @@ async function fetchJson(url) {
   return response.json();
 }
 
+function loadTime(data) {
+  const now = new Date();
+  return {
+    ...data.time,
+    hourMinute: now.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true
+    }).replace(/\s?(AM|PM)$/, ""),
+    meridiem: now.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      hour12: true
+    }).endsWith("AM") ? "AM" : "PM",
+    date: now.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric"
+    })
+  };
+}
+
 async function loadWeather(data) {
   const { latitude, longitude, timezone } = liveConfig.weather;
-  const url = new URL("https://api.open-meteo.com/v1/forecast");
+  const canUseLocalProxy = window.location.protocol.startsWith("http");
+  const url = canUseLocalProxy
+    ? new URL(liveConfig.weather.proxyUrl, window.location.origin)
+    : new URL("https://api.open-meteo.com/v1/forecast");
   url.search = new URLSearchParams({
     latitude,
     longitude,
+    current: "temperature_2m",
     daily: "temperature_2m_max",
     temperature_unit: "fahrenheit",
     timezone,
@@ -44,9 +70,11 @@ async function loadWeather(data) {
   });
 
   const payload = await fetchJson(url);
+  const current = Math.round(payload.current.temperature_2m);
   const high = Math.round(payload.daily.temperature_2m_max[0]);
   return {
     ...data.weather,
+    temp: `${current}&deg;`,
     high: `${high}&deg;`
   };
 }
@@ -67,7 +95,10 @@ function parseStooqCsv(csv) {
 }
 
 async function loadMarket(market) {
-  const url = `https://stooq.com/q/l/?s=${encodeURIComponent(market.stooq)}&f=sd2t2ohlcvp&h&e=csv`;
+  const canUseLocalProxy = window.location.protocol.startsWith("http");
+  const url = canUseLocalProxy
+    ? `${market.proxyUrl}?symbol=${encodeURIComponent(market.stooq)}`
+    : `https://stooq.com/q/l/?s=${encodeURIComponent(market.stooq)}&f=sd2t2ohlcvp&h&e=csv`;
   const response = await fetch(url, { cache: "no-store" });
   if (!response.ok) {
     throw new Error(`Market request failed: ${response.status}`);
@@ -87,17 +118,28 @@ async function loadMarkets(data) {
 
 async function loadQuote(data) {
   try {
-    const quote = await fetchJson("https://quoteslate.vercel.app/api/quotes/random?maxLength=45");
+    const quoteUrl = window.location.protocol.startsWith("http")
+      ? "/api/quote"
+      : "https://quoteslate.vercel.app/api/quotes/random?maxLength=45";
+    const quote = await fetchJson(quoteUrl);
     return {
       text: quote.quote || data.quote.text,
       author: quote.author || data.quote.author
     };
   } catch {
-    const quote = await fetchJson("https://api.quotable.io/random?maxLength=45");
-    return {
-      text: quote.content || data.quote.text,
-      author: quote.author || data.quote.author
-    };
+    try {
+      const quote = await fetchJson("https://api.quotable.io/random?maxLength=45");
+      return {
+        text: quote.content || data.quote.text,
+        author: quote.author || data.quote.author
+      };
+    } catch {
+      const quote = await fetchJson("https://dummyjson.com/quotes/random");
+      return {
+        text: quote.quote || data.quote.text,
+        author: quote.author || data.quote.author
+      };
+    }
   }
 }
 
@@ -148,6 +190,7 @@ async function loadCta(data) {
 
 async function loadDashboardData(fallbackData = dashboardData) {
   const next = structuredClone(fallbackData);
+  next.time = loadTime(next);
 
   const [weather, markets, quote, cta] = await Promise.allSettled([
     loadWeather(next),

@@ -108,6 +108,7 @@ p {
   text-align: left;
 }
 
+.weather-current,
 .weather-high {
   display: flex;
   align-items: baseline;
@@ -115,21 +116,25 @@ p {
   margin-top: 0;
 }
 
+.weather-high {
+  margin-top: 8px;
+}
+
 .weather-high-marker {
   display: inline-grid;
   place-items: center;
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
   border: 1px solid var(--muted);
   border-radius: 50%;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
 }
 
 .weather-temp {
   color: var(--ink);
-  font-size: 39px;
+  font-size: 31px;
   font-weight: 640;
   line-height: 1;
 }

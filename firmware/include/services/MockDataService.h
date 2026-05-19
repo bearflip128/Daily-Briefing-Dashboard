@@ -152,14 +152,21 @@ class MockDataService {
   static float extractFirstJsonNumberAfter(const String& body, const String& key) {
     const int keyIndex = body.indexOf("\"" + key + "\"");
     if (keyIndex < 0) return NAN;
-    int start = body.indexOf('[', keyIndex);
-    if (start < 0) start = body.indexOf(':', keyIndex);
+    int start = body.indexOf(':', keyIndex);
     if (start < 0) return NAN;
     start++;
-    while (start < body.length() && (body[start] == ' ' || body[start] == '\n')) start++;
+    while (start < body.length() && (body[start] == ' ' || body[start] == '\n' || body[start] == '[')) start++;
     int end = start;
     while (end < body.length() && (isDigit(body[end]) || body[end] == '-' || body[end] == '.')) end++;
     return body.substring(start, end).toFloat();
+  }
+
+  static float extractFirstJsonNumberInSection(const String& body, const String& section, const String& key) {
+    const int sectionIndex = body.indexOf("\"" + section + "\"");
+    if (sectionIndex < 0) return NAN;
+    const int keyIndex = body.indexOf("\"" + key + "\"", sectionIndex);
+    if (keyIndex < 0) return NAN;
+    return extractFirstJsonNumberAfter(body.substring(keyIndex), key);
   }
 
   static void applyLiveTime(DashboardSnapshot& snapshot) {
@@ -187,13 +194,18 @@ class MockDataService {
     String body;
     const String url =
         "https://api.open-meteo.com/v1/forecast?latitude=41.8781&longitude=-87.6298"
-        "&daily=temperature_2m_max&temperature_unit=fahrenheit&timezone=America%2FChicago&forecast_days=1";
+        "&current=temperature_2m&daily=temperature_2m_max&temperature_unit=fahrenheit"
+        "&timezone=America%2FChicago&forecast_days=1";
 
     if (!getHttps(url, body)) {
       return;
     }
 
-    const float high = extractFirstJsonNumberAfter(body, "temperature_2m_max");
+    const float current = extractFirstJsonNumberInSection(body, "current", "temperature_2m");
+    const float high = extractFirstJsonNumberInSection(body, "daily", "temperature_2m_max");
+    if (!isnan(current)) {
+      snapshot.weather.temperature = String((int)round(current));
+    }
     if (!isnan(high)) {
       snapshot.weather.high = String((int)round(high));
     }
@@ -242,7 +254,9 @@ class MockDataService {
   static void applyLiveQuote(DashboardSnapshot& snapshot) {
     String body;
     if (!getHttps("https://quoteslate.vercel.app/api/quotes/random?maxLength=45", body)) {
-      getHttps("https://api.quotable.io/random?maxLength=45", body);
+      if (!getHttps("https://api.quotable.io/random?maxLength=45", body)) {
+        getHttps("https://dummyjson.com/quotes/random", body);
+      }
     }
 
     const String text = extractJsonString(body, "quote").length() ? extractJsonString(body, "quote")

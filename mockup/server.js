@@ -46,6 +46,84 @@ async function handleCtaProxy(request, response) {
   response.end(body);
 }
 
+async function handleMarketProxy(request, response) {
+  const requestUrl = new URL(request.url, `http://127.0.0.1:${port}`);
+  const symbol = requestUrl.searchParams.get("symbol");
+
+  if (!symbol) {
+    response.writeHead(400, { "content-type": "text/plain; charset=utf-8" });
+    response.end("Missing symbol");
+    return;
+  }
+
+  const marketUrl = new URL("https://stooq.com/q/l/");
+  marketUrl.search = new URLSearchParams({
+    s: symbol,
+    f: "sd2t2ohlcvp",
+    h: "",
+    e: "csv"
+  });
+
+  const marketResponse = await fetch(marketUrl);
+  const body = await marketResponse.text();
+  response.writeHead(marketResponse.status, {
+    "content-type": "text/csv; charset=utf-8",
+    "cache-control": "no-store"
+  });
+  response.end(body);
+}
+
+async function handleWeatherProxy(request, response) {
+  const requestUrl = new URL(request.url, `http://127.0.0.1:${port}`);
+  const weatherUrl = new URL("https://api.open-meteo.com/v1/forecast");
+  weatherUrl.search = new URLSearchParams({
+    latitude: requestUrl.searchParams.get("latitude") || "41.8781",
+    longitude: requestUrl.searchParams.get("longitude") || "-87.6298",
+    current: "temperature_2m",
+    daily: "temperature_2m_max",
+    temperature_unit: "fahrenheit",
+    timezone: requestUrl.searchParams.get("timezone") || "America/Chicago",
+    forecast_days: "1"
+  });
+
+  const weatherResponse = await fetch(weatherUrl);
+  const body = await weatherResponse.text();
+  response.writeHead(weatherResponse.status, {
+    "content-type": "application/json; charset=utf-8",
+    "cache-control": "no-store"
+  });
+  response.end(body);
+}
+
+async function handleQuoteProxy(response) {
+  const urls = [
+    "https://quoteslate.vercel.app/api/quotes/random?maxLength=45",
+    "https://api.quotable.io/random?maxLength=45",
+    "https://dummyjson.com/quotes/random"
+  ];
+
+  for (const url of urls) {
+    let quoteResponse;
+    try {
+      quoteResponse = await fetch(url);
+    } catch {
+      continue;
+    }
+    if (!quoteResponse.ok) continue;
+
+    const body = await quoteResponse.text();
+    response.writeHead(200, {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
+    });
+    response.end(body);
+    return;
+  }
+
+  response.writeHead(502, { "content-type": "application/json; charset=utf-8" });
+  response.end(JSON.stringify({ error: "Quote APIs unavailable" }));
+}
+
 async function serveStatic(request, response) {
   const requestUrl = new URL(request.url, `http://127.0.0.1:${port}`);
   const pathname = requestUrl.pathname === "/" ? "/index.html" : requestUrl.pathname;
@@ -69,6 +147,21 @@ createServer(async (request, response) => {
   try {
     if (request.url?.startsWith("/api/cta")) {
       await handleCtaProxy(request, response);
+      return;
+    }
+
+    if (request.url?.startsWith("/api/market")) {
+      await handleMarketProxy(request, response);
+      return;
+    }
+
+    if (request.url?.startsWith("/api/weather")) {
+      await handleWeatherProxy(request, response);
+      return;
+    }
+
+    if (request.url?.startsWith("/api/quote")) {
+      await handleQuoteProxy(response);
       return;
     }
 
