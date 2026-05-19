@@ -67,10 +67,13 @@ class MockDataService {
   void begin() {
 #if defined(WIFI_SSID) && defined(WIFI_PASSWORD)
     WiFi.mode(WIFI_STA);
+    WiFi.setSleep(false);
+    WiFi.disconnect(true, true);
+    delay(250);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     Serial.print("Connecting WiFi");
-    for (uint8_t attempt = 0; attempt < 30 && WiFi.status() != WL_CONNECTED; attempt++) {
-      delay(250);
+    for (uint8_t attempt = 0; attempt < 60 && WiFi.status() != WL_CONNECTED; attempt++) {
+      delay(500);
       Serial.print(".");
     }
     Serial.println();
@@ -80,6 +83,9 @@ class MockDataService {
       Serial.println(WiFi.localIP());
       configTzTime("CST6CDT,M3.2.0,M11.1.0", "pool.ntp.org", "time.nist.gov");
     } else {
+      Serial.print("WiFi status code: ");
+      Serial.println(WiFi.status());
+      printConfiguredNetworkScan();
       Serial.println("WiFi unavailable; using fallback dashboard data.");
     }
 #else
@@ -103,6 +109,27 @@ class MockDataService {
   }
 
  private:
+  static void printConfiguredNetworkScan() {
+#if defined(WIFI_SSID)
+    Serial.println("Scanning for configured WiFi SSID...");
+    const int16_t networkCount = WiFi.scanNetworks();
+    bool found = false;
+    for (int16_t i = 0; i < networkCount; i++) {
+      if (WiFi.SSID(i) == WIFI_SSID) {
+        found = true;
+        Serial.print("Configured SSID found. RSSI: ");
+        Serial.print(WiFi.RSSI(i));
+        Serial.print(" dBm, encryption: ");
+        Serial.println(WiFi.encryptionType(i));
+      }
+    }
+    if (!found) {
+      Serial.println("Configured SSID was not found during scan.");
+    }
+    WiFi.scanDelete();
+#endif
+  }
+
   static DashboardSnapshot fallbackDashboard() {
     return {
         "5:37",
