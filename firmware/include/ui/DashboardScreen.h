@@ -13,14 +13,10 @@ constexpr int16_t frameH = 224;
 constexpr int16_t frameRadius = 14;
 constexpr int16_t contentX = 20;
 constexpr int16_t topY = 20;
-constexpr int16_t topH = 102;
-constexpr int16_t dividerTopY = 124;
-constexpr int16_t marketsY = 126;
-constexpr int16_t dividerBottomY = 170;
-constexpr int16_t quoteY = 176;
+constexpr int16_t topH = 136;
+constexpr int16_t dividerTopY = 158;
+constexpr int16_t quoteY = 166;
 constexpr int16_t weatherDividerX = 202;
-constexpr int16_t marketDividerA = 113;
-constexpr int16_t marketDividerB = 206;
 }
 
 class DashboardScreen {
@@ -41,31 +37,22 @@ class DashboardScreen {
       lastClockRenderMs_ = now;
     }
 
-    if (rendered_ && now - lastQuoteRenderMs_ >= quoteTickerMs_) {
-      drawQuoteSection(currentData_.quote);
-      lastQuoteRenderMs_ = now;
-      quoteOffset_ = (quoteOffset_ + quoteTickerStep_) % quoteCycleWidth(currentData_.quote);
-    }
-
     if (rendered_ && now - lastDataRefreshMs_ < AppConfig::liveDataRefreshMs) {
       return;
     }
 
     currentData_ = dataService_.dashboard();
-    quoteOffset_ = 0;
 
     display_.clear(DashboardColor::black);
     drawDivider();
     drawTimeSection(currentData_);
     drawWeatherSection(currentData_.weather);
     drawCTASection(currentData_.cta);
-    drawMarketsStrip(currentData_.markets);
     drawQuoteSection(currentData_.quote);
     drawWifiIndicator(currentData_.wifiConnected);
     drawPageIndicator();
     rendered_ = true;
     lastDataRefreshMs_ = now;
-    lastQuoteRenderMs_ = now;
     lastClockRenderMs_ = now;
   }
 
@@ -76,19 +63,16 @@ class DashboardScreen {
   }
 
   void drawDivider() {
-    // Major dividers map to the requested y ~= 125 and y ~= 170 layout bands.
+    // Removing the stock strip gives the tiny screen more room for glanceable data.
     display_.line(20, DashboardLayout::dividerTopY, 300, DashboardLayout::dividerTopY, DashboardColor::divider);
-    display_.line(20, DashboardLayout::dividerBottomY, 300, DashboardLayout::dividerBottomY, DashboardColor::divider);
-    display_.line(DashboardLayout::weatherDividerX, 20, DashboardLayout::weatherDividerX, 122, DashboardColor::divider);
-    display_.line(DashboardLayout::marketDividerA, 132, DashboardLayout::marketDividerA, 162, DashboardColor::divider);
-    display_.line(DashboardLayout::marketDividerB, 132, DashboardLayout::marketDividerB, 162, DashboardColor::divider);
+    display_.line(DashboardLayout::weatherDividerX, 20, DashboardLayout::weatherDividerX, 156, DashboardColor::divider);
   }
 
   void drawTimeSection(const DashboardSnapshot& data) {
-    display_.fillRect(18, 20, 100, 96, DashboardColor::black);
+    display_.fillRect(18, 20, 100, 136, DashboardColor::black);
     display_.textSans(20, 56, data.time, 2, DashboardColor::white);
     display_.text(102, 44, data.meridiem, 1, DashboardColor::muted);
-    display_.textSans(20, 108, data.date, 1, DashboardColor::muted);
+    display_.textSans(20, 132, data.date, 1, DashboardColor::muted);
   }
 
   void drawWifiIndicator(bool connected) {
@@ -101,41 +85,43 @@ class DashboardScreen {
     display_.text(132, 32, "C", 1, DashboardColor::muted);
     display_.textSans(152, 46, weather.temperature, 2, DashboardColor::white);
     display_.degreeMark(198, 24, DashboardColor::white);
-    display_.circle(136, 78, 7, DashboardColor::divider);
-    display_.text(132, 74, "H", 1, DashboardColor::muted);
-    display_.textSans(152, 88, weather.high, 2, DashboardColor::white);
-    display_.degreeMark(198, 66, DashboardColor::white);
+    display_.circle(136, 96, 7, DashboardColor::divider);
+    display_.text(132, 92, "H", 1, DashboardColor::muted);
+    display_.textSans(152, 106, weather.high, 2, DashboardColor::white);
+    display_.degreeMark(198, 84, DashboardColor::white);
   }
 
   void drawCTASection(const CtaSnapshot& cta) {
     display_.text(212, 24, "CTA - " + cta.station, 1, DashboardColor::muted);
-    display_.text(214, 40, cta.recommendation, 1,
+    display_.textSans(214, 50, cta.recommendation, 1,
                   cta.recommendation == "LEAVE NOW" ? DashboardColor::positive : DashboardColor::white);
     for (uint8_t i = 0; i < 3; i++) {
-      const int16_t y = 57 + (i * 20);
-      display_.circle(222, y + 7, 9, cta.arrivals[i].accentColor);
-      display_.text(219, y + 3, cta.arrivals[i].badge, 1, DashboardColor::white);
-      display_.textSans(242, y + 16, cta.arrivals[i].nextArrival, 1, DashboardColor::white);
-      display_.text(286, y + 8, cta.arrivals[i].direction, 1, DashboardColor::muted);
-    }
-  }
-
-  void drawMarketsStrip(const MarketSnapshot markets[3]) {
-    const int16_t x[3] = {32, 132, 226};
-    for (uint8_t i = 0; i < 3; i++) {
-      display_.textSans(x[i], 146, markets[i].label, 1, DashboardColor::white);
-      display_.textSans(x[i], 166, markets[i].percent, 1,
-                    markets[i].positive ? DashboardColor::positive : DashboardColor::negative);
+      const int16_t y = 72 + (i * 28);
+      display_.circle(222, y + 8, 10, cta.arrivals[i].accentColor);
+      display_.text(219, y + 4, cta.arrivals[i].badge, 1, DashboardColor::white);
+      display_.textSans(242, y + 18, cta.arrivals[i].nextArrival, 1, DashboardColor::white);
+      display_.text(286, y + 10, cta.arrivals[i].direction, 1, DashboardColor::muted);
     }
   }
 
   void drawQuoteSection(const QuoteSnapshot& quote) {
-    display_.fillRect(20, 176, 280, 46, DashboardColor::black);
-    const String ticker = "\"" + quote.text + "\"";
-    const int16_t textWidth = ticker.length() * 11;
-    const int16_t x = textWidth <= 270 ? 24 : 300 - quoteOffset_;
-    display_.textSans(x, 198, ticker, 1, DashboardColor::white);
-    display_.textSans(24, 218, "- " + quote.author, 1, DashboardColor::muted);
+    display_.fillRect(20, DashboardLayout::quoteY, 280, 54, DashboardColor::black);
+    const String text = "\"" + quote.text + "\"";
+    String firstLine = text;
+    String secondLine = "";
+
+    if (text.length() > 30) {
+      int split = text.lastIndexOf(' ', 30);
+      if (split < 16) split = 30;
+      firstLine = text.substring(0, split);
+      secondLine = text.substring(split + 1);
+    }
+
+    display_.textSans(24, 186, firstLine, 1, DashboardColor::white);
+    if (secondLine.length()) {
+      display_.textSans(24, 204, secondLine, 1, DashboardColor::white);
+    }
+    display_.textSans(24, 216, "- " + quote.author, 1, DashboardColor::muted);
   }
 
   void drawPageIndicator() {
@@ -143,21 +129,11 @@ class DashboardScreen {
     display_.circle(166, 230, 2, DashboardColor::muted);
   }
 
-  uint16_t quoteCycleWidth(const QuoteSnapshot& quote) const {
-    const String ticker = "\"" + quote.text + "\"";
-    const uint16_t estimate = ticker.length() * 11;
-    return max((uint16_t)300, (uint16_t)(estimate + 320));
-  }
-
   DisplayDriver& display_;
   MockDataService& dataService_;
   DashboardSnapshot currentData_;
   bool rendered_ = false;
   uint32_t lastDataRefreshMs_ = 0;
-  uint32_t lastQuoteRenderMs_ = 0;
   uint32_t lastClockRenderMs_ = 0;
-  uint16_t quoteOffset_ = 0;
-  static constexpr uint16_t quoteTickerMs_ = 60;
-  static constexpr uint8_t quoteTickerStep_ = 4;
   static constexpr uint16_t clockRefreshMs_ = 1000;
 };

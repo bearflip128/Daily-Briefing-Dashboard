@@ -3,9 +3,8 @@ const dashboard = document.querySelector("#dashboard");
 const UI = {
   regions: {
     frame: { x: 8, y: 8, w: 304, h: 224 },
-    top: { x: 20, y: 20, w: 280, h: 102 },
-    markets: { x: 20, y: 126, w: 280, h: 42 },
-    quote: { x: 20, y: 176, w: 280, h: 46 }
+    top: { x: 20, y: 20, w: 280, h: 136 },
+    quote: { x: 20, y: 166, w: 280, h: 54 }
   },
   columns: {
     ctaX: 212
@@ -78,23 +77,6 @@ function drawCTASection(cta) {
   );
 }
 
-function drawMarketsStrip(markets) {
-  const region = UI.regions.markets;
-  const items = markets
-    .map(
-      (market) => `<div class="market-item">
-        <span class="market-label">${market.label}</span>
-        <span class="market-percent ${market.direction}">${market.percent}</span>
-      </div>`
-    )
-    .join("");
-
-  dashboard.insertAdjacentHTML(
-    "beforeend",
-    `<section class="markets-strip" style="left:${region.x}px; top:${region.y}px">${items}</section>`
-  );
-}
-
 function drawQuoteSection(quote) {
   const region = UI.regions.quote;
   dashboard.insertAdjacentHTML(
@@ -124,16 +106,12 @@ function renderDashboard(data) {
   // Fixed regions match the 320x240 embedded target so browser iteration maps
   // cleanly to the firmware drawing coordinates.
   drawRoundedFrame();
-  drawDivider({ x: 20, y: 124, w: 280, h: 1 });
-  drawDivider({ x: 20, y: 170, w: 280, h: 1 });
-  drawDivider({ x: 202, y: 20, w: 1, h: 102 });
-  drawDivider({ x: 113, y: 132, w: 1, h: 30, className: "markets-divider" });
-  drawDivider({ x: 206, y: 132, w: 1, h: 30, className: "markets-divider" });
+  drawDivider({ x: 20, y: 158, w: 280, h: 1 });
+  drawDivider({ x: 202, y: 20, w: 1, h: 136 });
 
   drawTimeSection(data.time);
   drawWeatherSection(data.weather);
   drawCTASection(data.cta);
-  drawMarketsStrip(data.markets);
   drawQuoteSection(data.quote);
   drawWifiIndicator(data.status);
   drawPageIndicator();

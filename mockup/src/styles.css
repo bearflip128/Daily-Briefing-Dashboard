@@ -84,7 +84,6 @@ p {
 .time-section,
 .weather-section,
 .cta-section,
-.markets-strip,
 .quote-section {
   position: absolute;
 }
@@ -114,7 +113,7 @@ p {
 }
 
 .date-line {
-  margin-top: 23px;
+  margin-top: 47px;
   color: var(--muted);
   font-size: 15px;
   font-weight: 520;
@@ -134,7 +133,7 @@ p {
 }
 
 .weather-high {
-  margin-top: 7px;
+  margin-top: 25px;
 }
 
 .weather-marker {
@@ -168,9 +167,9 @@ p {
 }
 
 .cta-recommendation {
-  margin-top: 5px;
+  margin-top: 8px;
   color: var(--ink);
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 760;
   line-height: 1;
   white-space: nowrap;
@@ -182,15 +181,15 @@ p {
 
 .cta-list {
   display: grid;
-  gap: 2px;
-  margin: 5px 0 0;
+  gap: 8px;
+  margin: 12px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .cta-list li {
   display: grid;
-  grid-template-columns: 18px 34px 1fr;
+  grid-template-columns: 20px 34px 1fr;
   align-items: center;
   height: 20px;
   gap: 5px;
@@ -202,11 +201,11 @@ p {
 .line-badge {
   display: grid;
   place-items: center;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   color: white;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 750;
 }
 
@@ -237,42 +236,6 @@ p {
   justify-self: end;
 }
 
-.markets-strip {
-  width: 280px;
-  height: 42px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  align-items: center;
-}
-
-.market-item {
-  display: grid;
-  justify-items: center;
-  gap: 4px;
-  min-width: 0;
-}
-
-.market-label {
-  color: var(--ink);
-  font-size: 15px;
-  font-weight: 620;
-  white-space: nowrap;
-}
-
-.market-percent {
-  font-size: 14px;
-  font-weight: 650;
-  white-space: nowrap;
-}
-
-.market-percent.positive {
-  color: var(--positive);
-}
-
-.market-percent.negative {
-  color: var(--negative);
-}
-
 .quote-section {
   width: 280px;
   text-align: left;
@@ -286,19 +249,17 @@ p {
 
 .quote-text {
   color: var(--ink);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 520;
-  line-height: 1.16;
-  white-space: nowrap;
-  width: max-content;
-  min-width: 100%;
-  animation: quote-scroll 10s linear infinite;
+  line-height: 1.12;
+  white-space: normal;
+  width: 280px;
 }
 
 .quote-author {
-  margin-top: 7px;
+  margin-top: 5px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 520;
   line-height: 1;
   white-space: nowrap;
@@ -324,13 +285,4 @@ p {
 .dot.active {
   border-color: var(--ink);
   background: var(--ink);
-}
-
-@keyframes quote-scroll {
-  0%, 12% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(calc(-100% - 24px));
-  }
 }

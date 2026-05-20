@@ -22,11 +22,6 @@ const dashboardData = {
       { badge: "P", minutes: "27m", direction: "Ldn", tone: "purple" }
     ]
   },
-  markets: [
-    { label: "S&P 500", percent: "+0.71%", direction: "positive" },
-    { label: "VXUS", percent: "+0.42%", direction: "positive" },
-    { label: "BTC", percent: "-1.23%", direction: "negative" }
-  ],
   quote: {
     text: "Discipline compounds quietly.",
     author: "James Clear"

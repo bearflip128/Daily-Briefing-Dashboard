@@ -31,12 +31,6 @@ struct CtaSnapshot {
   CtaArrival arrivals[3];
 };
 
-struct MarketSnapshot {
-  String label;
-  String percent;
-  bool positive;
-};
-
 struct QuoteSnapshot {
   String text;
   String author;
@@ -49,7 +43,6 @@ struct DashboardSnapshot {
   bool wifiConnected;
   WeatherSnapshot weather;
   CtaSnapshot cta;
-  MarketSnapshot markets[3];
   QuoteSnapshot quote;
 };
 
@@ -108,7 +101,6 @@ class MockDataService {
     snapshot.wifiConnected = true;
     applyLiveTime(snapshot);
     applyLiveWeather(snapshot);
-    applyLiveMarkets(snapshot);
     applyLiveQuote(snapshot);
     applyLiveCta(snapshot);
     return snapshot;
@@ -174,9 +166,6 @@ class MockDataService {
          {{"R", "18m", "How", DashboardColor::ctaRed},
           {"B", "22m", "Loop", DashboardColor::ctaBrown},
           {"P", "27m", "Ldn", DashboardColor::ctaPurple}}},
-        {{"S&P 500", "+0.71%", true},
-         {"VXUS", "+0.42%", true},
-         {"BTC", "-1.23%", false}},
         {"Discipline compounds quietly.", "James Clear"}};
   }
 
@@ -270,46 +259,6 @@ class MockDataService {
     if (!isnan(high)) {
       snapshot.weather.high = String((int)round(high));
     }
-  }
-
-  static void applyLiveMarkets(DashboardSnapshot& snapshot) {
-    const char* symbols[3] = {"^spx", "vxus.us", "btcusd"};
-    for (uint8_t i = 0; i < 3; i++) {
-      String body;
-      String url = "https://stooq.com/q/l/?s=" + String(symbols[i]) + "&f=sd2t2ohlcvp&h&e=csv";
-      if (!getHttps(url, body)) continue;
-
-      const int headerEnd = body.indexOf('\n');
-      if (headerEnd < 0) continue;
-      String row = body.substring(headerEnd + 1);
-
-      const float close = getCsvField(row, 6).toFloat();
-      const float previous = getCsvField(row, 8).toFloat();
-      if (close <= 0 || previous <= 0) continue;
-
-      const float change = ((close - previous) / previous) * 100.0f;
-      String percent = String(change, 2) + "%";
-      if (!percent.startsWith("-") && !percent.startsWith("+")) {
-        percent = "+" + percent;
-      }
-      snapshot.markets[i].percent = percent;
-      snapshot.markets[i].positive = !percent.startsWith("-");
-    }
-  }
-
-  static String getCsvField(const String& row, uint8_t targetField) {
-    int start = 0;
-    for (uint8_t field = 0; field < targetField; field++) {
-      start = row.indexOf(',', start);
-      if (start < 0) return "";
-      start++;
-    }
-
-    int end = row.indexOf(',', start);
-    if (end < 0) end = row.length();
-    String value = row.substring(start, end);
-    value.trim();
-    return value;
   }
 
   static void applyLiveQuote(DashboardSnapshot& snapshot) {
