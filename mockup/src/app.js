@@ -77,6 +77,28 @@ function drawCTASection(cta) {
   );
 }
 
+function drawFullCTASection(data) {
+  const rows = data.cta.arrivals
+    .map(
+      (arrival) => `<li>
+        <span class="full-line-badge ${arrival.tone}">${arrival.badge}</span>
+        <span class="full-arrival-time">${arrival.minutes}</span>
+        <span class="full-arrival-direction">${arrival.direction || ""}</span>
+      </li>`
+    )
+    .join("");
+
+  dashboard.insertAdjacentHTML(
+    "beforeend",
+    `<section class="full-cta-page">
+      <p class="full-cta-label">CTA &mdash; ${data.cta.station}</p>
+      <p class="full-cta-clock">${data.time.hourMinute} ${data.time.meridiem}</p>
+      <p class="full-cta-recommendation ${data.cta.recommendation === "LEAVE NOW" ? "leave-now" : ""}">${data.cta.recommendation || "CTA LIVE"}</p>
+      <ul class="full-cta-list">${rows}</ul>
+    </section>`
+  );
+}
+
 function drawQuoteSection(quote) {
   const region = UI.regions.quote;
   dashboard.insertAdjacentHTML(
@@ -90,12 +112,12 @@ function drawQuoteSection(quote) {
   );
 }
 
-function drawPageIndicator() {
+function drawPageIndicator(activePage = 0) {
   dashboard.insertAdjacentHTML(
     "beforeend",
     `<div class="page-indicator" aria-label="Page 1 of 2">
-      <span class="dot active"></span>
-      <span class="dot"></span>
+      <span class="dot ${activePage === 0 ? "active" : ""}"></span>
+      <span class="dot ${activePage === 1 ? "active" : ""}"></span>
     </div>`
   );
 }
@@ -106,15 +128,9 @@ function renderDashboard(data) {
   // Fixed regions match the 320x240 embedded target so browser iteration maps
   // cleanly to the firmware drawing coordinates.
   drawRoundedFrame();
-  drawDivider({ x: 20, y: 158, w: 280, h: 1 });
-  drawDivider({ x: 202, y: 20, w: 1, h: 136 });
-
-  drawTimeSection(data.time);
-  drawWeatherSection(data.weather);
-  drawCTASection(data.cta);
-  drawQuoteSection(data.quote);
+  drawFullCTASection(data);
   drawWifiIndicator(data.status);
-  drawPageIndicator();
+  drawPageIndicator(1);
 }
 
 function refreshClockOnly() {
@@ -122,11 +138,13 @@ function refreshClockOnly() {
   const status = loadStatus(dashboardData);
   const timeValue = dashboard.querySelector(".time-value");
   const meridiem = dashboard.querySelector(".time-meridiem");
+  const fullCtaClock = dashboard.querySelector(".full-cta-clock");
   const dateLine = dashboard.querySelector(".date-line");
   const indicator = dashboard.querySelector(".wifi-indicator");
 
   if (timeValue) timeValue.textContent = time.hourMinute;
   if (meridiem) meridiem.textContent = time.meridiem;
+  if (fullCtaClock) fullCtaClock.textContent = `${time.hourMinute} ${time.meridiem}`;
   if (dateLine) dateLine.textContent = time.date;
   if (indicator) {
     indicator.className = `wifi-indicator ${status.wifiConnected ? "online" : "offline"}`;

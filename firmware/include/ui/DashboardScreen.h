@@ -32,7 +32,7 @@ class DashboardScreen {
     const uint32_t now = millis();
     if (rendered_ && now - lastClockRenderMs_ >= clockRefreshMs_) {
       dataService_.refreshClock(currentData_);
-      drawTimeSection(currentData_);
+      drawFullCtaClock(currentData_);
       drawWifiIndicator(currentData_.wifiConnected);
       lastClockRenderMs_ = now;
     }
@@ -42,7 +42,15 @@ class DashboardScreen {
     }
 
     currentData_ = dataService_.dashboard();
+    drawFullCtaPage();
+    rendered_ = true;
+    lastDataRefreshMs_ = now;
+    lastClockRenderMs_ = now;
+  }
 
+ private:
+  // Kept parked for now so we can return to the compact dashboard later.
+  void drawOverviewPage() {
     display_.clear(DashboardColor::black);
     drawDivider();
     drawTimeSection(currentData_);
@@ -50,13 +58,31 @@ class DashboardScreen {
     drawCTASection(currentData_.cta);
     drawQuoteSection(currentData_.quote);
     drawWifiIndicator(currentData_.wifiConnected);
-    drawPageIndicator();
-    rendered_ = true;
-    lastDataRefreshMs_ = now;
-    lastClockRenderMs_ = now;
+    drawPageIndicator(0);
   }
 
- private:
+  void drawFullCtaPage() {
+    display_.clear(DashboardColor::black);
+    drawFullCtaClock(currentData_);
+    drawWifiIndicator(currentData_.wifiConnected);
+    display_.text(20, 24, "CTA - " + currentData_.cta.station, 1, DashboardColor::muted);
+    display_.textSans(20, 62, currentData_.cta.recommendation, 2,
+                      currentData_.cta.recommendation == "LEAVE NOW" ? DashboardColor::positive : DashboardColor::white);
+
+    for (uint8_t i = 0; i < 3; i++) {
+      const int16_t y = 82 + (i * 36);
+      display_.circle(38, y, 14, currentData_.cta.arrivals[i].accentColor);
+      display_.text(34, y - 4, currentData_.cta.arrivals[i].badge, 1, DashboardColor::white);
+      display_.textSans(64, y + 11, currentData_.cta.arrivals[i].nextArrival, 2, DashboardColor::white);
+      display_.textSans(230, y + 7, currentData_.cta.arrivals[i].direction, 1, DashboardColor::muted);
+      if (i < 2) {
+        display_.line(20, y + 22, 300, y + 22, DashboardColor::divider);
+      }
+    }
+
+    drawPageIndicator(1);
+  }
+
   void drawRoundedFrame() {
     display_.roundedRect(DashboardLayout::frameX, DashboardLayout::frameY, DashboardLayout::frameW,
                          DashboardLayout::frameH, DashboardLayout::frameRadius, DashboardColor::muted);
@@ -78,6 +104,11 @@ class DashboardScreen {
   void drawWifiIndicator(bool connected) {
     display_.fillRect(300, 14, 12, 12, DashboardColor::black);
     display_.circle(306, 20, 4, connected ? DashboardColor::positive : DashboardColor::negative);
+  }
+
+  void drawFullCtaClock(const DashboardSnapshot& data) {
+    display_.fillRect(214, 20, 78, 24, DashboardColor::black);
+    display_.text(214, 22, data.time + " " + data.meridiem, 1, DashboardColor::muted);
   }
 
   void drawWeatherSection(const WeatherSnapshot& weather) {
@@ -124,9 +155,9 @@ class DashboardScreen {
     display_.textSans(24, 216, "- " + quote.author, 1, DashboardColor::muted);
   }
 
-  void drawPageIndicator() {
-    display_.circle(154, 230, 2, DashboardColor::white);
-    display_.circle(166, 230, 2, DashboardColor::muted);
+  void drawPageIndicator(uint8_t activePage) {
+    display_.circle(154, 234, 2, activePage == 0 ? DashboardColor::white : DashboardColor::muted);
+    display_.circle(166, 234, 2, activePage == 1 ? DashboardColor::white : DashboardColor::muted);
   }
 
   DisplayDriver& display_;

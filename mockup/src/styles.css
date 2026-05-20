@@ -84,7 +84,8 @@ p {
 .time-section,
 .weather-section,
 .cta-section,
-.quote-section {
+.quote-section,
+.full-cta-page {
   position: absolute;
 }
 
@@ -157,6 +158,103 @@ p {
 
 .cta-section {
   width: 86px;
+}
+
+.full-cta-page {
+  left: 20px;
+  top: 20px;
+  width: 280px;
+  height: 200px;
+}
+
+.full-cta-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.full-cta-clock {
+  position: absolute;
+  right: 8px;
+  top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.full-cta-recommendation {
+  margin-top: 8px;
+  color: var(--ink);
+  font-size: 31px;
+  font-weight: 760;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.full-cta-recommendation.leave-now {
+  color: var(--positive);
+}
+
+.full-cta-list {
+  display: grid;
+  gap: 9px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.full-cta-list li {
+  display: grid;
+  grid-template-columns: 34px 1fr 70px;
+  align-items: center;
+  min-height: 27px;
+  border-bottom: 1px solid var(--divider);
+  padding-bottom: 8px;
+}
+
+.full-cta-list li:last-child {
+  border-bottom: 0;
+}
+
+.full-line-badge {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: white;
+  font-size: 14px;
+  font-weight: 780;
+}
+
+.full-line-badge.red {
+  background: var(--red-line);
+}
+
+.full-line-badge.brown {
+  background: var(--brown-line);
+}
+
+.full-line-badge.purple {
+  background: var(--purple-line);
+}
+
+.full-arrival-time {
+  color: var(--ink);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.full-arrival-direction {
+  justify-self: end;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 680;
+  white-space: nowrap;
 }
 
 .section-label {
@@ -269,7 +367,7 @@ p {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 14px;
+  bottom: 8px;
   display: flex;
   justify-content: center;
   gap: 8px;
