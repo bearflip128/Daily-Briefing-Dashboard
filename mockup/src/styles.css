@@ -168,8 +168,9 @@ p {
 }
 
 .full-cta-label {
+  display: inline-block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 650;
   white-space: nowrap;
 }
@@ -177,7 +178,7 @@ p {
 .full-cta-clock {
   position: absolute;
   right: 8px;
-  top: 2px;
+  top: 24px;
   color: var(--muted);
   font-size: 12px;
   font-weight: 650;
@@ -185,7 +186,7 @@ p {
 }
 
 .full-cta-recommendation {
-  margin-top: 8px;
+  margin-top: 22px;
   color: var(--ink);
   font-size: 31px;
   font-weight: 760;
@@ -199,19 +200,19 @@ p {
 
 .full-cta-list {
   display: grid;
-  gap: 9px;
-  margin: 16px 0 0;
+  gap: 5px;
+  margin: 14px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .full-cta-list li {
   display: grid;
-  grid-template-columns: 34px 1fr 70px;
+  grid-template-columns: 34px 1fr 82px;
   align-items: center;
-  min-height: 27px;
+  min-height: 25px;
   border-bottom: 1px solid var(--divider);
-  padding-bottom: 8px;
+  padding-bottom: 4px;
 }
 
 .full-cta-list li:last-child {
@@ -243,7 +244,7 @@ p {
 
 .full-arrival-time {
   color: var(--ink);
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
@@ -252,7 +253,7 @@ p {
 .full-arrival-direction {
   justify-self: end;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 680;
   white-space: nowrap;
 }

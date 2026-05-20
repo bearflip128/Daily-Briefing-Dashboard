@@ -94,11 +94,11 @@ function minutesBetween(startTime, arrivalTime) {
 
 function compactCtaDirection(arrival) {
   const destination = arrival.destNm || arrival.stpDe || "";
-  if (destination.includes("95th")) return "95";
-  if (destination.includes("Howard")) return "How";
+  if (destination.includes("95th")) return "95th";
+  if (destination.includes("Howard")) return "Howard";
   if (destination.includes("Loop")) return "Loop";
-  if (destination.includes("Kimball")) return "Kim";
-  if (destination.includes("Linden")) return "Ldn";
+  if (destination.includes("Kimball")) return "Kimball";
+  if (destination.includes("Linden")) return "Linden";
   return arrival.trDr === "1" ? "N" : arrival.trDr === "5" ? "S" : "";
 }
 

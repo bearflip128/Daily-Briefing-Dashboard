@@ -65,16 +65,16 @@ class DashboardScreen {
     display_.clear(DashboardColor::black);
     drawFullCtaClock(currentData_);
     drawWifiIndicator(currentData_.wifiConnected);
-    display_.text(20, 24, "CTA - " + currentData_.cta.station, 1, DashboardColor::muted);
-    display_.textSans(20, 62, currentData_.cta.recommendation, 2,
+    display_.text(20, 20, "CTA - " + currentData_.cta.station, 2, DashboardColor::muted);
+    display_.textSans(20, 88, currentData_.cta.recommendation, 2,
                       currentData_.cta.recommendation == "LEAVE NOW" ? DashboardColor::positive : DashboardColor::white);
 
     for (uint8_t i = 0; i < 3; i++) {
-      const int16_t y = 82 + (i * 36);
+      const int16_t y = 120 + (i * 36);
       display_.circle(38, y, 14, currentData_.cta.arrivals[i].accentColor);
       display_.text(34, y - 4, currentData_.cta.arrivals[i].badge, 1, DashboardColor::white);
       display_.textSans(64, y + 11, currentData_.cta.arrivals[i].nextArrival, 2, DashboardColor::white);
-      display_.textSans(230, y + 7, currentData_.cta.arrivals[i].direction, 1, DashboardColor::muted);
+      display_.textSans(220, y + 7, currentData_.cta.arrivals[i].direction, 1, DashboardColor::muted);
       if (i < 2) {
         display_.line(20, y + 22, 300, y + 22, DashboardColor::divider);
       }
@@ -107,8 +107,8 @@ class DashboardScreen {
   }
 
   void drawFullCtaClock(const DashboardSnapshot& data) {
-    display_.fillRect(214, 20, 78, 24, DashboardColor::black);
-    display_.text(214, 22, data.time + " " + data.meridiem, 1, DashboardColor::muted);
+    display_.fillRect(214, 40, 92, 16, DashboardColor::black);
+    display_.text(218, 42, data.time + " " + data.meridiem, 1, DashboardColor::muted);
   }
 
   void drawWeatherSection(const WeatherSnapshot& weather) {

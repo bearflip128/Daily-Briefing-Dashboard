@@ -163,9 +163,9 @@ class MockDataService {
         {"43", "Chicago", "49", "36"},
         {"Fullerton",
          "WAIT 1m",
-         {{"R", "18m", "How", DashboardColor::ctaRed},
+         {{"R", "18m", "Howard", DashboardColor::ctaRed},
           {"B", "22m", "Loop", DashboardColor::ctaBrown},
-          {"P", "27m", "Ldn", DashboardColor::ctaPurple}}},
+          {"P", "27m", "Linden", DashboardColor::ctaPurple}}},
         {"Discipline compounds quietly.", "James Clear"}};
   }
 
@@ -357,11 +357,11 @@ class MockDataService {
     const String dest = extractJsonStringAt(body, body.indexOf("\"destNm\":\"", routeIndex), "destNm");
     const String stop = extractJsonStringAt(body, body.indexOf("\"stpDe\":\"", routeIndex), "stpDe");
     const String value = dest.length() ? dest : stop;
-    if (value.indexOf("95th") >= 0) return "95";
-    if (value.indexOf("Howard") >= 0) return "How";
+    if (value.indexOf("95th") >= 0) return "95th";
+    if (value.indexOf("Howard") >= 0) return "Howard";
     if (value.indexOf("Loop") >= 0) return "Loop";
-    if (value.indexOf("Kimball") >= 0) return "Kim";
-    if (value.indexOf("Linden") >= 0) return "Ldn";
+    if (value.indexOf("Kimball") >= 0) return "Kimball";
+    if (value.indexOf("Linden") >= 0) return "Linden";
     return "";
   }
 

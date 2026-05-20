@@ -17,9 +17,9 @@ const dashboardData = {
     station: "Fullerton",
     recommendation: "WAIT 1m",
     arrivals: [
-      { badge: "R", minutes: "18m", direction: "How", tone: "red" },
+      { badge: "R", minutes: "18m", direction: "Howard", tone: "red" },
       { badge: "B", minutes: "22m", direction: "Loop", tone: "brown" },
-      { badge: "P", minutes: "27m", direction: "Ldn", tone: "purple" }
+      { badge: "P", minutes: "27m", direction: "Linden", tone: "purple" }
     ]
   },
   quote: {
