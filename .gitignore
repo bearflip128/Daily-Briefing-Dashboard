@@ -10,6 +10,8 @@ node_modules/
 mockup/config.local.json
 mockup/src/config.local.js
 firmware/include/config/config.local.h
+web-control/data/dashboard-config.json
+web-control/*.log
 .env
 .env.*
 

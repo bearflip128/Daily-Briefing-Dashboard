@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Daily Briefing Control</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script defer src="./app.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel editor">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Daily Briefing</p>
+            <h1>Screen Control</h1>
+          </div>
+          <button id="saveButton" type="button">Save</button>
+        </header>
+
+        <form id="configForm">
+          <section class="group">
+            <h2>Page</h2>
+            <label>
+              Active page
+              <select name="activePage">
+                <option value="cta-full">Full CTA</option>
+                <option value="overview">Overview</option>
+                <option value="image">Image</option>
+              </select>
+            </label>
+          </section>
+
+          <section class="group">
+            <h2>CTA</h2>
+            <div class="switch-row">
+              <span>Enabled</span>
+              <input name="cta.enabled" type="checkbox">
+            </div>
+            <label>
+              Station name
+              <input name="cta.stationName" type="text" maxlength="24">
+            </label>
+            <label>
+              CTA station map ID
+              <input name="cta.stationMapId" type="text" inputmode="numeric">
+            </label>
+            <div class="split">
+              <label>
+                Walk minutes
+                <input name="cta.walkMinutes" type="number" min="0" max="60">
+              </label>
+              <label>
+                Buffer minutes
+                <input name="cta.comfortMinutes" type="number" min="0" max="15">
+              </label>
+            </div>
+            <label>
+              Routes
+              <input name="cta.routes" type="text" placeholder="Red, Brown, Purple">
+            </label>
+            <div class="switch-row">
+              <span>Show destination names</span>
+              <input name="cta.showDestinationNames" type="checkbox">
+            </div>
+          </section>
+
+          <section class="group">
+            <h2>Optional Widgets</h2>
+            <div class="switch-row">
+              <span>Weather</span>
+              <input name="weather.enabled" type="checkbox">
+            </div>
+            <label>
+              City
+              <input name="weather.city" type="text" maxlength="24">
+            </label>
+            <div class="switch-row">
+              <span>Quote</span>
+              <input name="quote.enabled" type="checkbox">
+            </div>
+            <div class="switch-row">
+              <span>Image page</span>
+              <input name="image.enabled" type="checkbox">
+            </div>
+            <label>
+              Image URL
+              <input name="image.url" type="url" placeholder="https://...">
+            </label>
+          </section>
+        </form>
+      </section>
+
+      <section class="panel preview-panel">
+        <header class="preview-head">
+          <h2>Device Preview</h2>
+          <p id="statusText">Loading config...</p>
+        </header>
+        <div class="device-frame">
+          <section id="preview" class="dashboard-preview"></section>
+        </div>
+        <pre id="jsonOutput" class="json-output"></pre>
+      </section>
+    </main>
+  </body>
+</html>

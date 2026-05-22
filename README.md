@@ -6,6 +6,7 @@ The repo has two tracks:
 
 - `mockup`: a local browser preview for fast visual iteration.
 - `firmware`: a PlatformIO/Arduino scaffold with the same layout regions and drawing helper boundaries.
+- `web-control`: a lightweight hosted control panel intended for `dashboard.natewalinder.com`.
 
 The V1 dashboard is passive display only. Touch, Spotify, news, and API integrations are intentionally left out of the first page.
 
@@ -52,6 +53,14 @@ Daily-Briefing-Dashboard/
 |       |   +-- MockDataService.h
 |       +-- ui/
 |           +-- DashboardScreen.h
++-- web-control/
+|   +-- server.js
+|   +-- public/
+|   |   +-- index.html
+|   |   +-- app.js
+|   |   +-- styles.css
+|   +-- data/
+|   |   +-- dashboard-config.example.json
 +-- .gitignore
 ```
 
@@ -84,6 +93,26 @@ npm run vite
 ```
 
 The mockup is fixed at 320x240 pixels so browser layout decisions map cleanly to embedded display coordinates.
+
+## Run the Web Control UI
+
+`web-control` is a small Node app designed to be hosted at `dashboard.natewalinder.com`. It provides an admin UI and a device-readable config endpoint:
+
+```bash
+cd web-control
+npm run dev
+```
+
+Then open `http://127.0.0.1:8787`.
+
+Key endpoints:
+
+- `GET /` - admin UI
+- `GET /api/config` - current editable config
+- `PUT /api/config` - save editable config
+- `GET /device-config.json` - ESP32-readable config
+
+The next firmware step is to poll `https://dashboard.natewalinder.com/device-config.json` and apply supported settings without reflashing.
 
 ## Firmware Setup Notes
 
