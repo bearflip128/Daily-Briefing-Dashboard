@@ -1,4 +1,5 @@
 import { createServer } from "node:http";
+import { lookup } from "node:dns/promises";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -11,6 +12,7 @@ const examplePath = join(root, "data", "dashboard-config.example.json");
 const port = Number(process.env.PORT || 8787);
 const bindHost = process.env.HOST || "127.0.0.1";
 const adminToken = process.env.DASHBOARD_ADMIN_TOKEN || "";
+const deviceStatusUrl = process.env.DASHBOARD_DEVICE_STATUS_URL || "http://daily-briefing-dashboard.local/status";
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -36,6 +38,41 @@ async function readConfig() {
 }
 
 async function readDeviceState() {
+  const storedState = await readStoredDeviceState();
+  const liveState = await probeDeviceStatus();
+  if (liveState) {
+    const nextState = normalizeDeviceState({
+      ...storedState,
+      ...liveState,
+      lastSeenAt: new Date().toISOString(),
+      lastSyncStatus: storedState.lastSyncStatus || "idle",
+      lastError: ""
+    });
+    await writeDeviceState(nextState);
+    return nextState;
+  }
+
+  const resolvedState = await resolveDeviceHost();
+  if (resolvedState) {
+    const nextState = normalizeDeviceState({
+      ...storedState,
+      ...resolvedState,
+      online: true,
+      lastSeenAt: new Date().toISOString(),
+      lastError: "Device hostname resolved; HTTP status endpoint is not responding yet"
+    });
+    await writeDeviceState(nextState);
+    return nextState;
+  }
+
+  return normalizeDeviceState({
+    ...storedState,
+    online: false,
+    lastError: storedState.lastError || "Device status endpoint did not respond"
+  });
+}
+
+async function readStoredDeviceState() {
   try {
     return normalizeDeviceState(JSON.parse(await readFile(statePath, "utf8")));
   } catch {
@@ -145,11 +182,54 @@ function normalizeWidgets(widgets) {
 function normalizeDeviceState(input) {
   return {
     online: Boolean(input.online),
+    statusUrl: input.statusUrl || deviceStatusUrl,
+    ip: input.ip || "",
+    rssi: Number.isFinite(Number(input.rssi)) ? Number(input.rssi) : null,
+    uptimeMs: Number.isFinite(Number(input.uptimeMs)) ? Number(input.uptimeMs) : null,
     lastSeenAt: input.lastSeenAt || null,
     lastPublishedAt: input.lastPublishedAt || null,
     lastSyncStatus: input.lastSyncStatus || "idle",
     lastError: input.lastError || ""
   };
+}
+
+async function probeDeviceStatus() {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 1500);
+  try {
+    const response = await fetch(deviceStatusUrl, {
+      cache: "no-store",
+      signal: controller.signal
+    });
+    if (!response.ok) return null;
+    const payload = await response.json();
+    return {
+      online: Boolean(payload.online ?? true),
+      statusUrl: deviceStatusUrl,
+      ip: String(payload.ip || ""),
+      rssi: payload.rssi,
+      uptimeMs: payload.uptimeMs
+    };
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function resolveDeviceHost() {
+  try {
+    const url = new URL(deviceStatusUrl);
+    const result = await lookup(url.hostname);
+    return {
+      statusUrl: deviceStatusUrl,
+      ip: result.address,
+      rssi: null,
+      uptimeMs: null
+    };
+  } catch {
+    return null;
+  }
 }
 
 function clampNumber(value, min, max, fallback) {

@@ -119,6 +119,9 @@ function renderStatus(issues) {
   const isOnline = Boolean(deviceStatus?.online);
   elements.deviceStatusPill.className = `status-pill ${isOnline ? "online" : "offline"}`;
   elements.deviceStatusPill.innerHTML = `<span class="status-dot" aria-hidden="true"></span><span>${isOnline ? "Device online" : "Device offline"}</span>`;
+  elements.deviceStatusPill.title = isOnline && deviceStatus?.ip
+    ? `ESP32 reachable at ${deviceStatus.ip}${deviceStatus.rssi ? `, RSSI ${deviceStatus.rssi} dBm` : ""}`
+    : (deviceStatus?.lastError || "Device status endpoint is not responding");
 
   elements.lastSyncedText.textContent = `Last synced: ${formatDateTime(deviceStatus?.lastPublishedAt)}`;
   elements.saveStateText.textContent = statusText(saveState, issues);

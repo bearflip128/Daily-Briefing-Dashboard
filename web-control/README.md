@@ -62,6 +62,14 @@ PORT=8787 HOST=0.0.0.0 DASHBOARD_ADMIN_TOKEN=change-me npm start
 
 The persisted config defaults to `web-control/data/dashboard-config.json`. Device publish state defaults to `web-control/data/device-state.json`. Set `DASHBOARD_CONFIG_PATH` or `DASHBOARD_DEVICE_STATE_PATH` if the host needs persistent storage somewhere else.
 
+The device online pill probes `DASHBOARD_DEVICE_STATUS_URL`, which defaults to:
+
+```text
+http://daily-briefing-dashboard.local/status
+```
+
+The firmware exposes that tiny status endpoint over Wi-Fi. If mDNS is unreliable on a host, set `DASHBOARD_DEVICE_STATUS_URL=http://DEVICE_IP/status`.
+
 ## Device Integration Plan
 
 The current ESP32 firmware does not yet poll this endpoint. The admin UI now publishes a config and timestamp, but the device needs firmware support before it can apply changes wirelessly. The next firmware step is:
