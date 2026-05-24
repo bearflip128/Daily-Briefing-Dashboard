@@ -53,7 +53,12 @@ localStorage.setItem("dashboardAdminToken", "YOUR_TOKEN")
 
 ## Deployment Notes
 
-This can run on a small Node host such as a VPS, Fly.io, Render, Railway, or a home server behind Cloudflare Tunnel.
+This can run in two ways:
+
+- Local/home network: `server.js`, which can directly probe the ESP32 on your LAN.
+- Cloudflare: `worker.js`, which serves the admin UI at `dashboard.natewalinder.com` and stores config in Workers KV.
+
+See [DEPLOY_CLOUDFLARE.md](./DEPLOY_CLOUDFLARE.md) for the Cloudflare deployment checklist.
 
 For `dashboard.natewalinder.com`, point DNS to the host, then run:
 
@@ -71,6 +76,8 @@ http://daily-briefing-dashboard.local/status
 ```
 
 The firmware exposes that tiny status endpoint over Wi-Fi. If mDNS is unreliable on a host, set `DASHBOARD_DEVICE_STATUS_URL=http://DEVICE_IP/status`.
+
+The Cloudflare-hosted version cannot directly reach local LAN addresses such as `192.168.0.156`. It supports cloud-side live snapshots through `POST /api/device/live`; firmware support for posting those snapshots is the next step.
 
 ## Device Integration Plan
 

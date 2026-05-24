@@ -5,7 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "node server.js",
+    "dev:cloudflare": "wrangler dev",
+    "deploy:cloudflare": "wrangler deploy",
     "start": "node server.js",
     "test": "node tests/config-smoke.test.js"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
   }
 }

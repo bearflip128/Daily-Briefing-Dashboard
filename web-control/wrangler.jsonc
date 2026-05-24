@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "daily-briefing-dashboard-control",
+  "main": "./worker.js",
+  "compatibility_date": "2026-05-21",
+  "routes": [
+    {
+      "pattern": "dashboard.natewalinder.com/*",
+      "zone_name": "natewalinder.com"
+    }
+  ],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/api/*",
+      "/device-config.json"
+    ]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "DASHBOARD_CONFIG",
+      "id": "REPLACE_WITH_PRODUCTION_KV_NAMESPACE_ID",
+      "preview_id": "REPLACE_WITH_PREVIEW_KV_NAMESPACE_ID"
+    }
+  ]
+}

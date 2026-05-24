@@ -15,6 +15,7 @@ web-control/data/device-state.json
 web-control/*.log
 .env
 .env.*
+web-control/.dev.vars
 
 # Build outputs
 mockup/dist/
