@@ -10,10 +10,15 @@ async function getJson(path) {
 
 const config = await getJson("/api/config");
 assert.equal(config.version, 1, "config version should be 1");
+assert(Array.isArray(config.widgets), "config should include widget ordering");
+assert(config.widgets.some((widget) => widget.id === "cta"), "CTA widget should be present");
 assert(config.cta.stationName, "CTA station name should be present");
 assert(Number.isFinite(config.cta.walkMinutes), "walk minutes should be numeric");
 
 const deviceConfig = await getJson("/device-config.json");
 assert.equal(deviceConfig.cta.stationMapId, config.cta.stationMapId, "device config should mirror admin config");
+
+const status = await getJson("/api/device/status");
+assert.equal(typeof status.online, "boolean", "device status should expose online state");
 
 console.log("Web control smoke tests passed.");

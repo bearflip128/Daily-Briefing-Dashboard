@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL(".", import.meta.url));
 const publicRoot = join(root, "public");
 const dataPath = process.env.DASHBOARD_CONFIG_PATH || join(root, "data", "dashboard-config.json");
+const statePath = process.env.DASHBOARD_DEVICE_STATE_PATH || join(root, "data", "device-state.json");
 const examplePath = join(root, "data", "dashboard-config.example.json");
 const port = Number(process.env.PORT || 8787);
 const bindHost = process.env.HOST || "127.0.0.1";
@@ -31,7 +32,20 @@ async function ensureConfigFile() {
 
 async function readConfig() {
   await ensureConfigFile();
-  return JSON.parse(await readFile(dataPath, "utf8"));
+  return normalizeConfig(JSON.parse(await readFile(dataPath, "utf8")));
+}
+
+async function readDeviceState() {
+  try {
+    return normalizeDeviceState(JSON.parse(await readFile(statePath, "utf8")));
+  } catch {
+    return normalizeDeviceState({});
+  }
+}
+
+async function writeDeviceState(state) {
+  await mkdir(dirname(statePath), { recursive: true });
+  await writeFile(statePath, JSON.stringify(normalizeDeviceState(state), null, 2));
 }
 
 function hasWriteAccess(request) {
@@ -55,6 +69,8 @@ function normalizeConfig(input) {
   config.activePage = ["cta-full", "overview", "image"].includes(config.activePage) ? config.activePage : "cta-full";
   config.deviceName = String(config.deviceName || "Daily Briefing Dashboard").slice(0, 48);
 
+  config.widgets = normalizeWidgets(config.widgets);
+
   config.cta ||= {};
   config.cta.enabled = Boolean(config.cta.enabled);
   config.cta.stationName = String(config.cta.stationName || "Fullerton").slice(0, 24);
@@ -73,6 +89,13 @@ function normalizeConfig(input) {
   config.weather.showCurrent = Boolean(config.weather.showCurrent);
   config.weather.showHigh = Boolean(config.weather.showHigh);
 
+  config.markets ||= {};
+  config.markets.enabled = Boolean(config.markets.enabled);
+  config.markets.symbols = Array.isArray(config.markets.symbols)
+    ? config.markets.symbols.map((symbol) => String(symbol).trim().toUpperCase()).filter(Boolean).slice(0, 6)
+    : ["SPY", "VXUS", "BTC"];
+  if (config.markets.symbols.length === 0) config.markets.symbols = ["SPY", "VXUS", "BTC"];
+
   config.quote ||= {};
   config.quote.enabled = Boolean(config.quote.enabled);
   config.quote.mode = ["static", "ticker"].includes(config.quote.mode) ? config.quote.mode : "static";
@@ -90,6 +113,45 @@ function normalizeConfig(input) {
   return config;
 }
 
+function normalizeWidgets(widgets) {
+  const defaults = [
+    { id: "cta", enabled: true },
+    { id: "clock", enabled: true },
+    { id: "weather", enabled: false },
+    { id: "quote", enabled: false },
+    { id: "markets", enabled: false },
+    { id: "image", enabled: false }
+  ];
+  const allowed = new Set(defaults.map((widget) => widget.id));
+  const seen = new Set();
+  const normalized = [];
+
+  if (Array.isArray(widgets)) {
+    for (const widget of widgets) {
+      const id = String(widget?.id || "");
+      if (!allowed.has(id) || seen.has(id)) continue;
+      normalized.push({ id, enabled: Boolean(widget.enabled) });
+      seen.add(id);
+    }
+  }
+
+  for (const widget of defaults) {
+    if (!seen.has(widget.id)) normalized.push(widget);
+  }
+
+  return normalized;
+}
+
+function normalizeDeviceState(input) {
+  return {
+    online: Boolean(input.online),
+    lastSeenAt: input.lastSeenAt || null,
+    lastPublishedAt: input.lastPublishedAt || null,
+    lastSyncStatus: input.lastSyncStatus || "idle",
+    lastError: input.lastError || ""
+  };
+}
+
 function clampNumber(value, min, max, fallback) {
   const number = Number(value);
   if (!Number.isFinite(number)) return fallback;
@@ -103,12 +165,14 @@ async function readRequestJson(request) {
 }
 
 async function handleApi(request, response) {
-  if (request.url === "/api/config" && request.method === "GET") {
+  const requestUrl = new URL(request.url, `http://${bindHost}:${port}`);
+
+  if (requestUrl.pathname === "/api/config" && request.method === "GET") {
     sendJson(response, 200, await readConfig());
     return true;
   }
 
-  if (request.url === "/api/config" && request.method === "PUT") {
+  if (requestUrl.pathname === "/api/config" && request.method === "PUT") {
     if (!hasWriteAccess(request)) {
       sendJson(response, 401, { error: "Missing or invalid admin token" });
       return true;
@@ -121,7 +185,33 @@ async function handleApi(request, response) {
     return true;
   }
 
-  if (request.url === "/device-config.json" && request.method === "GET") {
+  if (requestUrl.pathname === "/api/device/status" && request.method === "GET") {
+    sendJson(response, 200, await readDeviceState());
+    return true;
+  }
+
+  if (requestUrl.pathname === "/api/device/sync" && request.method === "POST") {
+    if (!hasWriteAccess(request)) {
+      sendJson(response, 401, { error: "Missing or invalid admin token" });
+      return true;
+    }
+
+    const now = new Date().toISOString();
+    const state = {
+      ...(await readDeviceState()),
+      lastPublishedAt: now,
+      lastSyncStatus: "published",
+      lastError: ""
+    };
+    await writeDeviceState(state);
+    sendJson(response, 200, {
+      ...state,
+      message: "Config published. Firmware polling is required for the device to apply it wirelessly."
+    });
+    return true;
+  }
+
+  if (requestUrl.pathname === "/device-config.json" && request.method === "GET") {
     sendJson(response, 200, await readConfig());
     return true;
   }

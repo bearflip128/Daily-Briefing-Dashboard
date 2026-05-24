@@ -2,9 +2,10 @@
 
 Small hosted control surface for the ESP32 dashboard. This is intended to live at `dashboard.natewalinder.com` once deployed.
 
-The app has two jobs:
+The app has three jobs:
 
 - Provide an admin UI for changing dashboard settings without editing code.
+- Keep a local draft in the browser so edits survive refresh before sync.
 - Expose `/device-config.json`, a compact JSON document the ESP32 can poll later.
 
 ## Run Locally
@@ -21,7 +22,18 @@ Open `http://127.0.0.1:8787`.
 - `GET /` - admin UI
 - `GET /api/config` - current config for the admin UI
 - `PUT /api/config` - save config
+- `GET /api/device/status` - current known device/publish state
+- `POST /api/device/sync` - publish the saved config for device polling
 - `GET /device-config.json` - public device-readable config
+
+## Admin UI Features
+
+- Drag-and-drop widget ordering with mouse or touch.
+- Enabled/disabled state per widget.
+- Compact settings and validation for CTA, weather, markets, quote, clock, and future image pages.
+- Live `320x240` device preview that updates immediately from the draft.
+- Explicit OTA sync state: unsaved changes, syncing, saved, failed, last published time, and online/offline indicator.
+- Collapsible advanced JSON inspector for debugging firmware config.
 
 ## Optional Admin Token
 
@@ -48,11 +60,11 @@ cd web-control
 PORT=8787 HOST=0.0.0.0 DASHBOARD_ADMIN_TOKEN=change-me npm start
 ```
 
-The persisted config defaults to `web-control/data/dashboard-config.json`. Set `DASHBOARD_CONFIG_PATH` if the host needs persistent storage somewhere else.
+The persisted config defaults to `web-control/data/dashboard-config.json`. Device publish state defaults to `web-control/data/device-state.json`. Set `DASHBOARD_CONFIG_PATH` or `DASHBOARD_DEVICE_STATE_PATH` if the host needs persistent storage somewhere else.
 
 ## Device Integration Plan
 
-The current ESP32 firmware does not yet poll this endpoint. The next firmware step is:
+The current ESP32 firmware does not yet poll this endpoint. The admin UI now publishes a config and timestamp, but the device needs firmware support before it can apply changes wirelessly. The next firmware step is:
 
 1. Add `REMOTE_CONFIG_URL`, for example `https://dashboard.natewalinder.com/device-config.json`.
 2. Poll the config periodically.

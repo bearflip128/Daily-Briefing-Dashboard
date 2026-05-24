@@ -6,6 +6,14 @@
     "mode": "dark",
     "accent": "mono"
   },
+  "widgets": [
+    { "id": "cta", "enabled": true },
+    { "id": "clock", "enabled": true },
+    { "id": "weather", "enabled": false },
+    { "id": "quote", "enabled": false },
+    { "id": "markets", "enabled": false },
+    { "id": "image", "enabled": false }
+  ],
   "cta": {
     "enabled": true,
     "stationName": "Fullerton",
@@ -23,6 +31,10 @@
     "city": "Chicago",
     "showCurrent": true,
     "showHigh": true
+  },
+  "markets": {
+    "enabled": false,
+    "symbols": ["SPY", "VXUS", "BTC"]
   },
   "quote": {
     "enabled": false,
