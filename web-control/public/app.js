@@ -1,8 +1,9 @@
 import { cloneConfig, normalizeConfig } from "./js/config-schema.js";
-import { renderDevicePreview } from "./js/device-preview.js";
+import { renderDevicePreview, renderLiveDeviceSnapshot } from "./js/device-preview.js";
 import {
   clearDraft,
   loadDeviceStatus,
+  loadLiveDeviceSnapshot,
   loadDraft,
   loadServerConfig,
   resetConfig,
@@ -16,13 +17,17 @@ import { renderWidgetEditor } from "./js/widget-editor.js";
 const elements = {
   widgetList: document.querySelector("#widgetList"),
   preview: document.querySelector("#preview"),
+  livePreview: document.querySelector("#livePreview"),
   jsonOutput: document.querySelector("#jsonOutput"),
   syncButton: document.querySelector("#syncButton"),
+  refreshLiveButton: document.querySelector("#refreshLiveButton"),
   resetButton: document.querySelector("#resetButton"),
   saveStateText: document.querySelector("#saveStateText"),
   lastSyncedText: document.querySelector("#lastSyncedText"),
   deviceStatusPill: document.querySelector("#deviceStatusPill"),
   dirtyPill: document.querySelector("#dirtyPill"),
+  liveStatePill: document.querySelector("#liveStatePill"),
+  liveMetaText: document.querySelector("#liveMetaText"),
   validationSummary: document.querySelector("#validationSummary"),
   alertRegion: document.querySelector("#alertRegion")
 };
@@ -30,6 +35,7 @@ const elements = {
 let savedConfig = null;
 let draftConfig = null;
 let deviceStatus = { online: false, lastPublishedAt: null, lastSyncStatus: "idle" };
+let livePayload = { online: false, error: "Waiting for live device snapshot" };
 let saveState = "loading";
 
 init();
@@ -44,6 +50,8 @@ async function init() {
     draftConfig = loadDraft() || cloneConfig(serverConfig);
     saveState = isDirty() ? "unsaved" : "saved";
     render();
+    refreshLiveSnapshot();
+    window.setInterval(refreshLiveSnapshot, 1000);
   } catch (error) {
     draftConfig = resetConfig();
     saveState = "failed";
@@ -54,12 +62,27 @@ async function init() {
 
 function bindActions() {
   elements.syncButton.addEventListener("click", handleSync);
+  elements.refreshLiveButton.addEventListener("click", refreshLiveSnapshot);
   elements.resetButton.addEventListener("click", () => {
     draftConfig = resetConfig();
     saveState = "unsaved";
     showAlert("Draft reset to defaults. Sync OTA to publish it.", "info");
     render();
   });
+}
+
+async function refreshLiveSnapshot() {
+  try {
+    livePayload = await loadLiveDeviceSnapshot();
+  } catch (error) {
+    livePayload = {
+      online: false,
+      receivedAt: new Date().toISOString(),
+      error: error.message
+    };
+  }
+  renderLiveStatus();
+  renderLiveDeviceSnapshot(elements.livePreview, livePayload);
 }
 
 function handleDraftChange(nextConfig, options = {}) {
@@ -103,9 +126,11 @@ function render(options = {}) {
     renderWidgetEditor(elements.widgetList, draftConfig, handleDraftChange);
   }
   renderDevicePreview(elements.preview, draftConfig, deviceStatus);
+  renderLiveDeviceSnapshot(elements.livePreview, livePayload);
   elements.jsonOutput.textContent = JSON.stringify(draftConfig, null, 2);
   renderValidation(issues);
   renderStatus(issues);
+  renderLiveStatus();
 }
 
 function renderValidation(issues) {
@@ -129,6 +154,16 @@ function renderStatus(issues) {
   elements.dirtyPill.className = `dirty-pill ${isDirty() ? "dirty" : ""}`;
   elements.syncButton.disabled = saveState === "syncing" || issues.length > 0;
   elements.syncButton.textContent = saveState === "syncing" ? "Syncing..." : "Sync OTA";
+}
+
+function renderLiveStatus() {
+  const online = Boolean(livePayload?.online && livePayload?.snapshot);
+  elements.liveStatePill.textContent = online ? "Live matched to device data" : "Live unavailable";
+  elements.liveStatePill.className = `dirty-pill ${online ? "live" : "dirty"}`;
+  elements.liveMetaText.textContent = online
+    ? `Polled ${formatTimeOnly(livePayload.receivedAt)}`
+    : (livePayload?.error || "Waiting for device");
+  elements.refreshLiveButton.disabled = false;
 }
 
 function isDirty() {
@@ -161,6 +196,17 @@ function formatDateTime(value) {
     day: "numeric",
     hour: "numeric",
     minute: "2-digit"
+  }).format(date);
+}
+
+function formatTimeOnly(value) {
+  if (!value) return "never";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "never";
+  return new Intl.DateTimeFormat([], {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit"
   }).format(date);
 }
 

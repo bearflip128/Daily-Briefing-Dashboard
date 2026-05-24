@@ -39,6 +39,12 @@ export async function loadDeviceStatus() {
   return response.json();
 }
 
+export async function loadLiveDeviceSnapshot() {
+  const response = await fetch("/api/device/live", { cache: "no-store" });
+  if (!response.ok) throw new Error("Unable to load live device snapshot.");
+  return response.json();
+}
+
 export function loadDraft() {
   try {
     const rawDraft = window.localStorage.getItem(DRAFT_KEY);

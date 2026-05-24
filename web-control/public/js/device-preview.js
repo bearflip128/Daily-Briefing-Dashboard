@@ -23,6 +23,18 @@ export function renderDevicePreview(container, config, deviceStatus) {
     : renderOverview(config, widgets, deviceStatus);
 }
 
+export function renderLiveDeviceSnapshot(container, livePayload) {
+  if (!livePayload?.online || !livePayload.snapshot) {
+    container.classList.add("full-cta");
+    container.innerHTML = `<div class="live-empty">${escapeHtml(livePayload?.error || "Live device snapshot unavailable")}</div>`;
+    return;
+  }
+
+  const snapshot = livePayload.snapshot;
+  container.classList.add("full-cta");
+  container.innerHTML = renderFullCtaSnapshot(snapshot);
+}
+
 function renderFullCta(config, deviceStatus) {
   const rows = config.cta.routes.slice(0, 3).map((routeName, index) => {
     const route = ROUTES[routeName] || { badge: routeName.slice(0, 1), tone: "", destination: routeName };
@@ -42,6 +54,28 @@ function renderFullCta(config, deviceStatus) {
     </header>
     <p class="leave-label">WAIT</p>
     <p class="leave-time">${Math.max(0, config.cta.walkMinutes - 14)}m</p>
+    <ul class="train-list">${rows}</ul>
+  `;
+}
+
+function renderFullCtaSnapshot(snapshot) {
+  const arrivals = Array.isArray(snapshot.cta?.arrivals) ? snapshot.cta.arrivals.slice(0, 3) : [];
+  const rows = arrivals.map((arrival) => {
+    return `<li class="train-row">
+      <span class="route-badge ${routeToneForBadge(arrival.badge)}">${escapeHtml(arrival.badge)}</span>
+      <span class="train-minutes">${escapeHtml(arrival.nextArrival)}</span>
+      <span class="train-destination">${escapeHtml(arrival.direction)}</span>
+    </li>`;
+  }).join("");
+
+  return `
+    ${renderWifi({ online: snapshot.wifiConnected })}
+    <header class="full-cta-head">
+      <p class="device-title">CTA - ${escapeHtml(snapshot.cta?.station || "Fullerton")}</p>
+      <p class="device-time">${escapeHtml(`${snapshot.time || "--:--"} ${snapshot.meridiem || ""}`.trim())}</p>
+    </header>
+    <p class="leave-label">${recommendationLabel(snapshot.cta?.recommendation)}</p>
+    <p class="leave-time">${recommendationValue(snapshot.cta?.recommendation)}</p>
     <ul class="train-list">${rows}</ul>
   `;
 }
@@ -104,6 +138,26 @@ function renderWidget(widgetId, config) {
 function renderWifi(deviceStatus) {
   const online = Boolean(deviceStatus?.online);
   return `<span class="wifi-indicator ${online ? "online" : "offline"}" title="${online ? "Device online" : "Device offline"}"></span>`;
+}
+
+function recommendationLabel(value) {
+  const text = String(value || "CTA LIVE");
+  if (text.startsWith("WAIT ")) return "WAIT";
+  return text;
+}
+
+function recommendationValue(value) {
+  const text = String(value || "CTA LIVE");
+  if (text.startsWith("WAIT ")) return text.replace("WAIT ", "");
+  if (text === "LEAVE NOW") return "NOW";
+  return "";
+}
+
+function routeToneForBadge(badge) {
+  if (badge === "R") return "red";
+  if (badge === "B") return "brown";
+  if (badge === "P") return "purple";
+  return "";
 }
 
 function renderEmptyPreview() {

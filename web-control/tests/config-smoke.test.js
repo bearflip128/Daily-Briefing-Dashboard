@@ -21,4 +21,7 @@ assert.equal(deviceConfig.cta.stationMapId, config.cta.stationMapId, "device con
 const status = await getJson("/api/device/status");
 assert.equal(typeof status.online, "boolean", "device status should expose online state");
 
+const live = await getJson("/api/device/live");
+assert.equal(typeof live.online, "boolean", "live endpoint should expose online state");
+
 console.log("Web control smoke tests passed.");

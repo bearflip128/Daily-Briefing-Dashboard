@@ -10,8 +10,8 @@
 DisplayDriver display;
 MockDataService dataService;
 OtaUpdateService otaService;
-DeviceStatusService statusService;
 DashboardScreen dashboard(display, dataService);
+DeviceStatusService statusService(dashboard);
 
 void setup() {
   Serial.begin(AppConfig::serialBaud);
@@ -20,8 +20,8 @@ void setup() {
   display.begin();
   dataService.begin();
   otaService.begin();
-  statusService.begin();
   dashboard.begin();
+  statusService.begin();
 }
 
 void loop() {

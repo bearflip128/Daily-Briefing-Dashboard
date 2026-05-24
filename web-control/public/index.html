@@ -48,18 +48,40 @@
 
         <section class="preview-stack" aria-label="Device preview and advanced config">
           <section class="panel preview-panel">
-            <div class="panel-head">
+            <div class="panel-head preview-panel-head">
               <div>
-                <p class="eyebrow">Live Preview</p>
-                <h2>320 x 240 display</h2>
+                <p class="eyebrow">Compare</p>
+                <h2>Edit vs Currently Live</h2>
               </div>
-              <span id="dirtyPill" class="dirty-pill">Saved</span>
+              <div class="preview-pills">
+                <span id="dirtyPill" class="dirty-pill">Saved</span>
+                <span id="liveStatePill" class="dirty-pill">Live loading</span>
+              </div>
             </div>
 
-            <div class="device-stage">
-              <div class="device-hardware" aria-label="Physical dashboard preview">
-                <section id="preview" class="dashboard-preview"></section>
-              </div>
+            <div class="compare-stage">
+              <article class="compare-device">
+                <div class="compare-label">
+                  <span>Edit preview</span>
+                  <small>Draft config</small>
+                </div>
+                <div class="device-hardware" aria-label="Editable dashboard preview">
+                  <section id="preview" class="dashboard-preview"></section>
+                </div>
+              </article>
+
+              <article class="compare-device">
+                <div class="compare-label">
+                  <span>Currently live</span>
+                  <small id="liveMetaText">Waiting for device</small>
+                </div>
+                <div class="device-hardware live-device-hardware" aria-label="Currently live physical dashboard view">
+                  <section id="livePreview" class="dashboard-preview live-dashboard-preview">
+                    <div class="live-empty">Waiting for live device snapshot</div>
+                  </section>
+                </div>
+                <button id="refreshLiveButton" class="ghost-button compact-button" type="button">Refresh live</button>
+              </article>
             </div>
           </section>
 

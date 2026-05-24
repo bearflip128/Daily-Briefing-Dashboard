@@ -23,6 +23,7 @@ Open `http://127.0.0.1:8787`.
 - `GET /api/config` - current config for the admin UI
 - `PUT /api/config` - save config
 - `GET /api/device/status` - current known device/publish state
+- `GET /api/device/live` - current device-rendered dashboard snapshot
 - `POST /api/device/sync` - publish the saved config for device polling
 - `GET /device-config.json` - public device-readable config
 
@@ -32,6 +33,7 @@ Open `http://127.0.0.1:8787`.
 - Enabled/disabled state per widget.
 - Compact settings and validation for CTA, weather, markets, quote, clock, and future image pages.
 - Live `320x240` device preview that updates immediately from the draft.
+- Side-by-side "Currently live" view that polls the ESP32's `/snapshot` endpoint once per second.
 - Explicit OTA sync state: unsaved changes, syncing, saved, failed, last published time, and online/offline indicator.
 - Collapsible advanced JSON inspector for debugging firmware config.
 

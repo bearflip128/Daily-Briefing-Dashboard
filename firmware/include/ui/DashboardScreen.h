@@ -28,6 +28,14 @@ class DashboardScreen {
     Serial.println("Dashboard screen ready.");
   }
 
+  const DashboardSnapshot& snapshot() const {
+    return currentData_;
+  }
+
+  bool hasRendered() const {
+    return rendered_;
+  }
+
   void update() {
     const uint32_t now = millis();
     if (rendered_ && now - lastClockRenderMs_ >= clockRefreshMs_) {

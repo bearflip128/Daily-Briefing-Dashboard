@@ -13,6 +13,7 @@ const port = Number(process.env.PORT || 8787);
 const bindHost = process.env.HOST || "127.0.0.1";
 const adminToken = process.env.DASHBOARD_ADMIN_TOKEN || "";
 const deviceStatusUrl = process.env.DASHBOARD_DEVICE_STATUS_URL || "http://daily-briefing-dashboard.local/status";
+const deviceSnapshotUrl = process.env.DASHBOARD_DEVICE_SNAPSHOT_URL || deviceStatusUrl.replace(/\/status\/?$/, "/snapshot");
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -217,6 +218,36 @@ async function probeDeviceStatus() {
   }
 }
 
+async function readDeviceSnapshot() {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 1800);
+  try {
+    const response = await fetch(deviceSnapshotUrl, {
+      cache: "no-store",
+      signal: controller.signal
+    });
+    if (!response.ok) {
+      return { online: false, error: `Device snapshot returned ${response.status}` };
+    }
+    const payload = await response.json();
+    return {
+      online: true,
+      snapshotUrl: deviceSnapshotUrl,
+      receivedAt: new Date().toISOString(),
+      snapshot: payload
+    };
+  } catch (error) {
+    return {
+      online: false,
+      snapshotUrl: deviceSnapshotUrl,
+      receivedAt: new Date().toISOString(),
+      error: error instanceof Error ? error.message : "Device snapshot unavailable"
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 async function resolveDeviceHost() {
   try {
     const url = new URL(deviceStatusUrl);
@@ -267,6 +298,11 @@ async function handleApi(request, response) {
 
   if (requestUrl.pathname === "/api/device/status" && request.method === "GET") {
     sendJson(response, 200, await readDeviceState());
+    return true;
+  }
+
+  if (requestUrl.pathname === "/api/device/live" && request.method === "GET") {
+    sendJson(response, 200, await readDeviceSnapshot());
     return true;
   }
 
