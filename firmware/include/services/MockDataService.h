@@ -23,7 +23,7 @@ struct CtaArrival {
   String nextArrival;
   String direction;
   uint16_t accentColor;
-  int rawMinutes = -1;
+  int rawMinutes;
 };
 
 struct CtaSnapshot {
