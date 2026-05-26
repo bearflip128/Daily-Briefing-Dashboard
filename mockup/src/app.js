@@ -123,13 +123,18 @@ function drawPageIndicator(activePage = 0) {
 }
 
 function renderDashboard(data) {
+  const view = {
+    ...data,
+    cta: normalizeCtaForDisplay(data.cta)
+  };
+
   dashboard.innerHTML = "";
 
   // Fixed regions match the 320x240 embedded target so browser iteration maps
   // cleanly to the firmware drawing coordinates.
   drawRoundedFrame();
-  drawFullCTASection(data);
-  drawWifiIndicator(data.status);
+  drawFullCTASection(view);
+  drawWifiIndicator(view.status);
   drawPageIndicator(1);
 }
 

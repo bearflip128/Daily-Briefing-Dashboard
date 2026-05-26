@@ -77,15 +77,22 @@ class DashboardScreen {
     display_.textSans(20, 88, currentData_.cta.recommendation, 2,
                       currentData_.cta.recommendation == "LEAVE NOW" ? DashboardColor::positive : DashboardColor::white);
 
+    const uint8_t visibleCount = countVisibleArrivals(currentData_.cta);
+    uint8_t visibleIndex = 0;
     for (uint8_t i = 0; i < 3; i++) {
-      const int16_t y = 120 + (i * 36);
+      if (!isVisibleArrival(currentData_.cta.arrivals[i])) {
+        continue;
+      }
+
+      const int16_t y = 120 + (visibleIndex * 36);
       display_.circle(38, y, 14, currentData_.cta.arrivals[i].accentColor);
       display_.text(34, y - 4, currentData_.cta.arrivals[i].badge, 1, DashboardColor::white);
       display_.textSans(64, y + 11, currentData_.cta.arrivals[i].nextArrival, 2, DashboardColor::white);
       display_.textSans(220, y + 7, currentData_.cta.arrivals[i].direction, 1, DashboardColor::muted);
-      if (i < 2) {
+      if (visibleIndex + 1 < visibleCount) {
         display_.line(20, y + 22, 300, y + 22, DashboardColor::divider);
       }
+      visibleIndex++;
     }
 
     drawPageIndicator(1);
@@ -134,12 +141,18 @@ class DashboardScreen {
     display_.text(212, 24, "CTA - " + cta.station, 1, DashboardColor::muted);
     display_.textSans(214, 50, cta.recommendation, 1,
                   cta.recommendation == "LEAVE NOW" ? DashboardColor::positive : DashboardColor::white);
+    uint8_t visibleIndex = 0;
     for (uint8_t i = 0; i < 3; i++) {
-      const int16_t y = 72 + (i * 28);
+      if (!isVisibleArrival(cta.arrivals[i])) {
+        continue;
+      }
+
+      const int16_t y = 72 + (visibleIndex * 28);
       display_.circle(222, y + 8, 10, cta.arrivals[i].accentColor);
       display_.text(219, y + 4, cta.arrivals[i].badge, 1, DashboardColor::white);
       display_.textSans(242, y + 18, cta.arrivals[i].nextArrival, 1, DashboardColor::white);
       display_.text(286, y + 10, cta.arrivals[i].direction, 1, DashboardColor::muted);
+      visibleIndex++;
     }
   }
 
@@ -166,6 +179,20 @@ class DashboardScreen {
   void drawPageIndicator(uint8_t activePage) {
     display_.circle(154, 234, 2, activePage == 0 ? DashboardColor::white : DashboardColor::muted);
     display_.circle(166, 234, 2, activePage == 1 ? DashboardColor::white : DashboardColor::muted);
+  }
+
+  static bool isVisibleArrival(const CtaArrival& arrival) {
+    return arrival.nextArrival != "--" && arrival.badge.length() > 0;
+  }
+
+  static uint8_t countVisibleArrivals(const CtaSnapshot& cta) {
+    uint8_t visibleCount = 0;
+    for (uint8_t i = 0; i < 3; i++) {
+      if (isVisibleArrival(cta.arrivals[i])) {
+        visibleCount++;
+      }
+    }
+    return visibleCount;
   }
 
   DisplayDriver& display_;

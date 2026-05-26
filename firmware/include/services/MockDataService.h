@@ -23,6 +23,7 @@ struct CtaArrival {
   String nextArrival;
   String direction;
   uint16_t accentColor;
+  int rawMinutes = -1;
 };
 
 struct CtaSnapshot {
@@ -94,6 +95,7 @@ class MockDataService {
     maintainWiFi();
 
     if (WiFi.status() != WL_CONNECTED) {
+      applyLoopMorningFilter(snapshot.cta);
       snapshot.wifiConnected = false;
       return snapshot;
     }
@@ -103,6 +105,7 @@ class MockDataService {
     applyLiveWeather(snapshot);
     applyLiveQuote(snapshot);
     applyLiveCta(snapshot);
+    applyLoopMorningFilter(snapshot.cta);
     return snapshot;
   }
 
@@ -163,9 +166,9 @@ class MockDataService {
         {"43", "Chicago", "49", "36"},
         {"Fullerton",
          "WAIT 1m",
-         {{"R", "18m", "Howard", DashboardColor::ctaRed},
-          {"B", "22m", "Loop", DashboardColor::ctaBrown},
-          {"P", "27m", "Linden", DashboardColor::ctaPurple}}},
+         {{"R", "18m", "Howard", DashboardColor::ctaRed, 18},
+          {"B", "22m", "Loop", DashboardColor::ctaBrown, 22},
+          {"P", "27m", "Linden", DashboardColor::ctaPurple, 27}}},
         {"Discipline compounds quietly.", "James Clear"}};
   }
 
@@ -283,16 +286,17 @@ class MockDataService {
       return;
     }
 
-    const int redMinutes = applyRouteArrival(body, "Red", snapshot.cta.arrivals[0]);
-    const int brownMinutes = applyRouteArrival(body, "Brn", snapshot.cta.arrivals[1]);
-    const int purpleMinutes = applyRouteArrival(body, "P", snapshot.cta.arrivals[2]);
+    const bool loopOnly = shouldShowLoopOnlyNow();
+    const int redMinutes = applyRouteArrival(body, "Red", snapshot.cta.arrivals[0], loopOnly);
+    const int brownMinutes = applyRouteArrival(body, "Brn", snapshot.cta.arrivals[1], loopOnly);
+    const int purpleMinutes = applyRouteArrival(body, "P", snapshot.cta.arrivals[2], loopOnly);
     snapshot.cta.recommendation = ctaRecommendation(redMinutes, brownMinutes, purpleMinutes);
 #else
     (void)snapshot;
 #endif
   }
 
-  static int applyRouteArrival(const String& body, const String& route, CtaArrival& arrival) {
+  static int applyRouteArrival(const String& body, const String& route, CtaArrival& arrival, bool loopOnly) {
     const String routeToken = "\"rt\":\"" + route + "\"";
     int routeIndex = body.indexOf(routeToken);
     int selectedMinutes = -1;
@@ -305,7 +309,9 @@ class MockDataService {
         const String arrivalTime = extractJsonStringAt(body, arrivalKey, "arrT");
         const String predictionTime = predictionKey >= 0 ? extractJsonStringAt(body, predictionKey, "prdt") : "";
         const int minutes = predictionTime.length() ? minutesBetween(predictionTime, arrivalTime) : minutesUntil(arrivalTime);
-        if (minutes >= ctaCatchableMinutes() && (selectedMinutes < 0 || minutes < selectedMinutes)) {
+        const String direction = compactCtaDirection(body, routeIndex);
+        if ((!loopOnly || direction == "Loop") && minutes >= ctaCatchableMinutes() &&
+            (selectedMinutes < 0 || minutes < selectedMinutes)) {
           selectedMinutes = minutes;
           selectedRouteIndex = routeIndex;
         }
@@ -316,11 +322,13 @@ class MockDataService {
     if (selectedMinutes < 0) {
       arrival.nextArrival = "--";
       arrival.direction = "";
+      arrival.rawMinutes = -1;
       return -1;
     }
 
     arrival.nextArrival = String(selectedMinutes) + "m";
     arrival.direction = compactCtaDirection(body, selectedRouteIndex);
+    arrival.rawMinutes = selectedMinutes;
     return selectedMinutes;
   }
 
@@ -341,6 +349,71 @@ class MockDataService {
 
   static constexpr int ctaCatchableMinutes() {
     return AppConfig::ctaWalkMinutes + AppConfig::ctaComfortMinutes;
+  }
+
+  static bool shouldShowLoopOnlyNow() {
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo, 200)) {
+      return false;
+    }
+
+    return timeinfo.tm_wday >= 1 && timeinfo.tm_wday <= 5 && timeinfo.tm_hour < 12;
+  }
+
+  static int parseMinutesText(const String& value) {
+    if (value.length() == 0) {
+      return -1;
+    }
+
+    int minutes = 0;
+    bool foundDigit = false;
+    for (size_t i = 0; i < value.length(); i++) {
+      const char c = value[i];
+      if (!isDigit(c)) {
+        break;
+      }
+      foundDigit = true;
+      minutes = minutes * 10 + (c - '0');
+    }
+
+    return foundDigit ? minutes : -1;
+  }
+
+  static void applyLoopMorningFilter(CtaSnapshot& cta) {
+    if (!shouldShowLoopOnlyNow()) {
+      return;
+    }
+
+    CtaArrival compacted[3];
+    int compactedMinutes[3] = {-1, -1, -1};
+    uint8_t visibleCount = 0;
+
+    for (uint8_t i = 0; i < 3; i++) {
+      const CtaArrival& arrival = cta.arrivals[i];
+      if (arrival.nextArrival == "--" || arrival.direction != "Loop") {
+        continue;
+      }
+
+      compacted[visibleCount] = arrival;
+      compactedMinutes[visibleCount] = arrival.rawMinutes >= 0 ? arrival.rawMinutes : parseMinutesText(arrival.nextArrival);
+      visibleCount++;
+    }
+
+    for (uint8_t i = visibleCount; i < 3; i++) {
+      CtaArrival blank;
+      blank.badge = "";
+      blank.nextArrival = "--";
+      blank.direction = "";
+      blank.accentColor = 0;
+      blank.rawMinutes = -1;
+      compacted[i] = blank;
+    }
+
+    for (uint8_t i = 0; i < 3; i++) {
+      cta.arrivals[i] = compacted[i];
+    }
+
+    cta.recommendation = ctaRecommendation(compactedMinutes[0], compactedMinutes[1], compactedMinutes[2]);
   }
 
   static String extractJsonStringAt(const String& body, int keyIndex, const String& key) {

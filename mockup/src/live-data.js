@@ -102,6 +102,26 @@ function compactCtaDirection(arrival) {
   return arrival.trDr === "1" ? "N" : arrival.trDr === "5" ? "S" : "";
 }
 
+function chicagoTimeParts(now = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    weekday: "short",
+    hour: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(now);
+
+  const lookup = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return {
+    weekday: lookup.weekday || "",
+    hour: Number(lookup.hour || "0")
+  };
+}
+
+function isWeekdayMorningInChicago(now = new Date()) {
+  const { weekday, hour } = chicagoTimeParts(now);
+  return ["Mon", "Tue", "Wed", "Thu", "Fri"].includes(weekday) && hour < 12;
+}
+
 function ctaRecommendation(arrivals) {
   const catchableMinutes = liveConfig.ctaWalkMinutes + liveConfig.ctaComfortMinutes;
   const soonest = arrivals
@@ -115,6 +135,20 @@ function ctaRecommendation(arrivals) {
 
   const wait = Math.max(0, soonest - catchableMinutes);
   return wait === 0 ? "LEAVE NOW" : `WAIT ${wait}m`;
+}
+
+function normalizeCtaForDisplay(cta, now = new Date()) {
+  if (!cta) return cta;
+
+  const arrivals = isWeekdayMorningInChicago(now)
+    ? cta.arrivals.filter((arrival) => arrival.direction === "Loop")
+    : cta.arrivals;
+
+  return {
+    ...cta,
+    arrivals,
+    recommendation: ctaRecommendation(arrivals)
+  };
 }
 
 async function loadQuote(data) {
@@ -139,7 +173,7 @@ async function loadQuote(data) {
 async function loadCta(data) {
   const canUseLocalProxy = window.location.protocol.startsWith("http");
   if (!liveConfig.cta.apiKey && !canUseLocalProxy) {
-    return data.cta;
+    return normalizeCtaForDisplay(data.cta);
   }
 
   const url = canUseLocalProxy
@@ -165,13 +199,24 @@ async function loadCta(data) {
     { rt: "Brn", badge: "B", tone: "brown" },
     { rt: "P", badge: "P", tone: "purple" }
   ];
+  const loopOnly = isWeekdayMorningInChicago();
 
   const arrivals = routeOrder.map((route, index) => {
     const catchableMinutes = liveConfig.ctaWalkMinutes + liveConfig.ctaComfortMinutes;
     const match = eta
       .filter((arrival) => arrival.rt === route.rt)
       .map((arrival) => ({ arrival, minutes: minutesBetween(arrival.prdt, arrival.arrT) }))
-      .filter((candidate) => Number.isFinite(candidate.minutes) && candidate.minutes >= catchableMinutes)
+      .filter((candidate) => {
+        if (!Number.isFinite(candidate.minutes) || candidate.minutes < catchableMinutes) {
+          return false;
+        }
+
+        if (!loopOnly) {
+          return true;
+        }
+
+        return compactCtaDirection(candidate.arrival) === "Loop";
+      })
       .sort((a, b) => a.minutes - b.minutes)[0];
 
     if (!match) {
@@ -187,7 +232,7 @@ async function loadCta(data) {
     };
   });
 
-  return { ...data.cta, recommendation: ctaRecommendation(arrivals), arrivals };
+  return normalizeCtaForDisplay({ ...data.cta, recommendation: ctaRecommendation(arrivals), arrivals });
 }
 
 async function loadDashboardData(fallbackData = dashboardData) {
@@ -204,6 +249,7 @@ async function loadDashboardData(fallbackData = dashboardData) {
   if (weather.status === "fulfilled") next.weather = weather.value;
   if (quote.status === "fulfilled") next.quote = quote.value;
   if (cta.status === "fulfilled") next.cta = cta.value;
+  else next.cta = normalizeCtaForDisplay(next.cta);
 
   return next;
 }
