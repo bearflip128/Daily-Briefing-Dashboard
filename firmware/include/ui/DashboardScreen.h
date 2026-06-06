@@ -36,8 +36,24 @@ class DashboardScreen {
     return rendered_;
   }
 
+  bool isDisplaySleeping() const {
+    return displaySleeping_;
+  }
+
   void update() {
     const uint32_t now = millis();
+    const bool shouldSleepDisplay = shouldSleepDisplayNow(now);
+    if (shouldSleepDisplay) {
+      if (!displaySleeping_) {
+        enterDisplaySleep();
+      }
+      return;
+    }
+
+    if (displaySleeping_) {
+      wakeDisplay();
+    }
+
     if (rendered_ && now - lastClockRenderMs_ >= clockRefreshMs_) {
       dataService_.refreshClock(currentData_);
       drawFullCtaClock(currentData_);
@@ -57,6 +73,41 @@ class DashboardScreen {
   }
 
  private:
+  bool shouldSleepDisplayNow(uint32_t now) {
+    if (now - lastSleepCheckMs_ < displaySleepCheckMs_) {
+      return sleepWindowActive_;
+    }
+
+    lastSleepCheckMs_ = now;
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo, 50)) {
+      sleepWindowActive_ = false;
+      return false;
+    }
+
+    sleepWindowActive_ = timeinfo.tm_hour >= AppConfig::displaySleepStartHour &&
+                         timeinfo.tm_hour < AppConfig::displaySleepEndHour;
+    return sleepWindowActive_;
+  }
+
+  void enterDisplaySleep() {
+    display_.clear(DashboardColor::black);
+    display_.setBacklight(false);
+    displaySleeping_ = true;
+    rendered_ = false;
+    Serial.println("Display sleep active until 5 AM.");
+  }
+
+  void wakeDisplay() {
+    display_.setBacklight(true);
+    display_.clear(DashboardColor::black);
+    displaySleeping_ = false;
+    rendered_ = false;
+    lastDataRefreshMs_ = 0;
+    lastClockRenderMs_ = 0;
+    Serial.println("Display sleep ended; dashboard waking.");
+  }
+
   // Kept parked for now so we can return to the compact dashboard later.
   void drawOverviewPage() {
     display_.clear(DashboardColor::black);
@@ -199,7 +250,11 @@ class DashboardScreen {
   MockDataService& dataService_;
   DashboardSnapshot currentData_;
   bool rendered_ = false;
+  bool displaySleeping_ = false;
+  bool sleepWindowActive_ = false;
   uint32_t lastDataRefreshMs_ = 0;
   uint32_t lastClockRenderMs_ = 0;
+  uint32_t lastSleepCheckMs_ = 0;
   static constexpr uint16_t clockRefreshMs_ = 1000;
+  static constexpr uint16_t displaySleepCheckMs_ = 1000;
 };

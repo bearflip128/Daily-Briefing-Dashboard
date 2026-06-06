@@ -42,6 +42,7 @@ class DeviceStatusService {
     body += "\"online\":" + String(connected ? "true" : "false") + ",";
     body += "\"ip\":\"" + WiFi.localIP().toString() + "\",";
     body += "\"rssi\":" + String(WiFi.RSSI()) + ",";
+    body += "\"displaySleeping\":" + String(dashboard_.isDisplaySleeping() ? "true" : "false") + ",";
     body += "\"uptimeMs\":" + String(millis());
     body += "}";
 
@@ -52,8 +53,9 @@ class DeviceStatusService {
   void handleSnapshot() {
     const DashboardSnapshot& snapshot = dashboard_.snapshot();
     String body = "{";
-    body += "\"screen\":\"full-cta\",";
+    body += "\"screen\":\"" + String(dashboard_.isDisplaySleeping() ? "off" : "full-cta") + "\",";
     body += "\"rendered\":" + String(dashboard_.hasRendered() ? "true" : "false") + ",";
+    body += "\"displaySleeping\":" + String(dashboard_.isDisplaySleeping() ? "true" : "false") + ",";
     body += "\"capturedAtMs\":" + String(millis()) + ",";
     body += "\"wifiConnected\":" + String(snapshot.wifiConnected ? "true" : "false") + ",";
     body += "\"time\":\"" + jsonEscape(snapshot.time) + "\",";
